@@ -3,67 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Tutorin Academic Check — pahami tantangan belajar anak dan tentukan langkah pendampingan yang paling sesuai." />
-  <title>Tutorin — Kenali Kebutuhan Belajar Anak</title>
+  <meta name="description" content="Tutorin Assessment — bantu orang tua memahami kebutuhan belajar anak dan cara belajar yang lebih sesuai." />
+  <title>Tutorin Assessment</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="site-header">
     <a class="brand" href="./" aria-label="Tutorin">Tutorin</a>
-    <span class="brand-sub">Academic Check</span>
+    <span class="brand-sub">Learning Assessment</span>
   </header>
 
   <main>
-    <section id="start-screen" class="screen active">
-      <div class="hero-card">
-        <div class="eyebrow">LEARNING NEED CHECK</div>
-        <h1>Kenapa anak sulit belajar, dan apakah ia perlu les?</h1>
-        <p class="lead">Jawab 10 pertanyaan sederhana tentang kondisi belajar anak. Dalam ±3 menit, Anda akan mendapat gambaran masalah utama, apakah perlu pendampingan, dan apa langkah yang bisa dicoba.</p>
-        <div class="benefits"><span>✓ Gratis</span><span>✓ ±3 menit</span><span>✓ Hasil personal</span></div>
-        <button class="primary-btn" id="start-btn">Mulai Assessment <span>→</span></button>
-        <p class="microcopy">Tidak ada jawaban benar atau salah. Jawab berdasarkan kondisi anak dalam 3 bulan terakhir.</p>
+    <section id="home-screen" class="screen active">
+      <div class="hero-card home-hero">
+        <div class="eyebrow">UNTUK ORANG TUA</div>
+        <h1>Pahami kebutuhan belajar anak sebelum memilih les.</h1>
+        <p class="lead">Pilih assessment sesuai kebutuhan Anda. Keduanya singkat dan hasilnya langsung bisa dipakai untuk menentukan langkah berikutnya.</p>
       </div>
-      <div class="how-card">
-        <h2>Yang akan Anda dapatkan</h2>
-        <div class="how-grid">
-          <article><b>01</b><h3>Tantangan utama</h3><p>Apakah masalah terbesar ada pada konsep, kebiasaan, kemandirian, atau ketahanan belajar.</p></article>
-          <article><b>02</b><h3>Perlu les atau tidak?</h3><p>Rekomendasi awal yang tidak otomatis mengarahkan semua anak ke privat.</p></article>
-          <article><b>03</b><h3>Apa yang harus dilakukan?</h3><p>Langkah praktis yang bisa dicoba orang tua dan bentuk pendampingan yang sesuai.</p></article>
-        </div>
+
+      <div class="assessment-choice-grid">
+        <article class="choice-card">
+          <div class="choice-number">01</div>
+          <div class="eyebrow">LEARNING NEED CHECK</div>
+          <h2>Apakah anak perlu les privat?</h2>
+          <p>Kenali apakah tantangan utama anak ada pada pemahaman akademik, kemandirian, kebiasaan, atau cara menghadapi soal sulit.</p>
+          <div class="choice-meta"><span>10 pertanyaan</span><span>±3 menit</span></div>
+          <button class="primary-btn" id="need-start-btn">Coba Assessment →</button>
+        </article>
+
+        <article class="choice-card">
+          <div class="choice-number">02</div>
+          <div class="eyebrow">LEARNING METHOD CHECK</div>
+          <h2>Bagaimana cara belajar yang lebih cocok?</h2>
+          <p>Kenali cara anak merespons penjelasan, latihan, bantuan, feedback, dan tantangan agar pendampingan lebih sesuai.</p>
+          <div class="choice-meta"><span>6 pertanyaan</span><span>±2 menit</span></div>
+          <button class="primary-btn" id="method-start-btn">Coba Assessment →</button>
+        </article>
       </div>
+
+      <div class="home-note"><strong>Catatan:</strong> hasil assessment merupakan screening awal, bukan diagnosis psikologis atau akademik.</div>
     </section>
 
-    <section id="assessment-screen" class="screen" aria-live="polite">
+    <section id="need-assessment-screen" class="screen" aria-live="polite">
       <div class="assessment-shell">
-        <div class="progress-wrap">
-          <div class="progress-top"><span id="step-label">Pertanyaan 1</span><span id="progress-label">0%</span></div>
-          <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
-        </div>
-        <div class="question-card">
-          <div id="question-kicker" class="question-kicker"></div>
-          <h2 id="question-title"></h2>
-          <p id="question-help" class="question-help"></p>
-          <div id="options" class="options"></div>
-        </div>
-        <div class="assessment-nav">
-          <button id="back-btn" class="secondary-btn" type="button">← Kembali</button>
-          <button id="next-btn" class="primary-btn" type="button" disabled>Lanjut →</button>
-        </div>
+        <div class="progress-wrap"><div class="progress-top"><span id="step-label"></span><span id="progress-label"></span></div><div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div></div>
+        <div class="question-card"><div id="question-kicker" class="question-kicker"></div><h2 id="question-title"></h2><p id="question-help" class="question-help"></p><div id="options" class="options"></div></div>
+        <div class="assessment-nav"><button id="back-btn" class="secondary-btn" type="button">← Kembali</button><button id="next-btn" class="primary-btn" type="button" disabled>Lanjut →</button></div>
       </div>
     </section>
 
-    <section id="result-screen" class="screen">
-      <div class="result-shell">
-        <div class="eyebrow">HASIL UNTUK ORANG TUA</div>
-        <h1 id="result-title">Gambaran kebutuhan belajar anak</h1>
-        <p id="result-summary" class="lead"></p>
-
-        <div class="result-hero-card">
-          <span class="result-label">KESIMPULAN UTAMA</span>
-          <h2 id="parent-conclusion"></h2>
-          <p id="parent-conclusion-copy"></p>
-        </div>
-
+    <section id="need-result-screen" class="screen">
+      <div class="result-shell printable" id="need-result-content">
+        <div class="eyebrow">HASIL ASSESSMENT</div>
+        <h1>Gambaran kebutuhan belajar anak</h1>
+        <p id="need-result-summary" class="lead"></p>
+        <div class="result-hero-card"><span class="result-label">KESIMPULAN UTAMA</span><h2 id="parent-conclusion"></h2><p id="parent-conclusion-copy"></p></div>
         <div class="result-grid">
           <div class="result-card"><span class="result-label">KONDISI AKADEMIK</span><strong id="academic-level"></strong><p id="academic-copy"></p></div>
           <div class="result-card"><span class="result-label">KEMANDIRIAN</span><strong id="independence-level"></strong><p id="independence-copy"></p></div>
@@ -71,97 +65,33 @@
           <div class="result-card"><span class="result-label">RESPONS SAAT SULIT</span><strong id="resilience-level"></strong><p id="resilience-copy"></p></div>
           <div class="result-card full"><span class="result-label">TANTANGAN YANG PALING MENONJOL</span><div id="focus-tags" class="tag-row"></div><p id="focus-explanation"></p></div>
         </div>
-
-        <div class="action-card">
-          <div class="action-copy">
-            <span class="result-label">APA YANG SEBAIKNYA DILAKUKAN?</span>
-            <h2 id="action-title"></h2>
-            <p id="action-copy"></p>
-          </div>
-          <div class="action-list" id="action-list"></div>
-        </div>
-
-        <div class="recommend-card">
-          <div>
-            <span class="result-label">PERLUKAH PENDAMPINGAN?</span>
-            <h2 id="recommendation-title"></h2>
-            <p id="recommendation-copy"></p>
-            <div id="recommendation-cta-wrap" class="cta-wrap"></div>
-          </div>
-          <div class="session-plan">
-            <h3 id="session-plan-title">Contoh pola pendampingan</h3>
-            <div id="session-plan-list"></div>
-          </div>
-        </div>
-
-        <div class="next-card">
-          <div>
-            <span class="result-label">PERSONALISASI</span>
-            <h2>Ingin tahu cara belajar yang lebih cocok?</h2>
-            <p>Jawab 6 pertanyaan tambahan untuk melihat preferensi belajar dan pola sesi yang lebih sesuai. Ini bukan label “tipe belajar” yang kaku, tetapi panduan untuk menyesuaikan cara tutor mendampingi anak.</p>
-          </div>
-          <button id="method-btn" class="primary-btn">Lanjut ke Learning Method →</button>
-        </div>
-
-        <div class="contact-card">
-          <h2>Catatan untuk orang tua</h2>
-          <p>Hasil ini adalah screening awal, bukan diagnosis akademik. Jika tantangan anak menetap, diagnostic test dapat digunakan untuk memastikan materi yang perlu diperkuat.</p>
-          <a class="secondary-link" href="https://wa.me/6280000000000?text=Halo%20Tutorin%2C%20saya%20ingin%20konsultasi%20hasil%20Academic%20Check." target="_blank" rel="noreferrer">Konsultasi hasil ↗</a>
-        </div>
-
-        <button id="restart-btn" class="text-btn">Ulangi assessment</button>
+        <div class="action-card"><div class="action-copy"><span class="result-label">LANGKAH YANG BISA DILAKUKAN</span><h2 id="action-title"></h2><p id="action-copy"></p></div><div class="action-list" id="action-list"></div></div>
+        <div class="recommend-card"><div><span class="result-label">REKOMENDASI PENDAMPINGAN</span><h2 id="recommendation-title"></h2><p id="recommendation-copy"></p></div><div class="session-plan"><h3>Pola pendampingan</h3><div id="session-plan-list"></div></div></div>
       </div>
+      <div class="result-actions"><button id="download-need-btn" class="primary-btn">Download Hasil PDF</button><a id="whatsapp-need-btn" class="secondary-btn link-btn" target="_blank" rel="noreferrer">Konsultasi via WhatsApp ↗</a><button id="back-home-from-need" class="text-btn">← Kembali ke Home</button></div>
     </section>
 
-    <section id="method-screen" class="screen" aria-live="polite">
+    <section id="method-assessment-screen" class="screen" aria-live="polite">
       <div class="assessment-shell">
-        <div class="progress-wrap">
-          <div class="progress-top"><span id="method-step-label">Pertanyaan 1</span><span id="method-progress-label">0%</span></div>
-          <div class="progress-track"><div id="method-progress-bar" class="progress-bar"></div></div>
-        </div>
-        <div class="question-card">
-          <div class="question-kicker">LEARNING METHOD CHECK</div>
-          <h2 id="method-question-title"></h2>
-          <p class="question-help">Pilih kondisi yang paling menggambarkan anak.</p>
-          <div id="method-options" class="options"></div>
-        </div>
-        <div class="assessment-nav">
-          <button id="method-back-btn" class="secondary-btn" type="button">← Kembali</button>
-          <button id="method-next-btn" class="primary-btn" type="button" disabled>Lanjut →</button>
-        </div>
+        <div class="progress-wrap"><div class="progress-top"><span id="method-step-label"></span><span id="method-progress-label"></span></div><div class="progress-track"><div id="method-progress-bar" class="progress-bar"></div></div></div>
+        <div class="question-card"><div class="question-kicker">LEARNING METHOD CHECK</div><h2 id="method-question-title"></h2><p class="question-help">Pilih kondisi yang paling menggambarkan anak.</p><div id="method-options" class="options"></div></div>
+        <div class="assessment-nav"><button id="method-back-btn" class="secondary-btn" type="button">← Kembali</button><button id="method-next-btn" class="primary-btn" type="button" disabled>Lanjut →</button></div>
       </div>
     </section>
 
     <section id="method-result-screen" class="screen">
-      <div class="result-shell">
-        <div class="eyebrow">PROFIL PREFERENSI BELAJAR</div>
+      <div class="result-shell printable" id="method-result-content">
+        <div class="eyebrow">HASIL ASSESSMENT</div>
         <h1 id="profile-title"></h1>
         <p id="profile-summary" class="lead"></p>
-        <div class="profile-card">
-          <div class="profile-meta"><span class="result-label">POLA YANG TERLIHAT</span><strong id="profile-name"></strong></div>
-          <p id="profile-description"></p>
-          <div class="profile-chips" id="profile-chips"></div>
-        </div>
-        <div class="recommend-card">
-          <div>
-            <span class="result-label">POLA SESI YANG DISARANKAN</span>
-            <h2 id="method-protocol-title"></h2>
-            <p id="method-protocol-copy"></p>
-          </div>
-          <div class="session-plan" id="method-plan-list"></div>
-        </div>
-        <div class="next-card compact">
-          <div>
-            <span class="result-label">TAHAP SELANJUTNYA</span>
-            <h2>Validasi dengan Diagnostic Test</h2>
-            <p>Gunakan tes akademik sesuai jenjang dan tujuan anak untuk memastikan gap materi sebelum menyusun program belajar.</p>
-          </div>
-          <button id="method-restart-btn" class="primary-btn">Mulai Lagi</button>
-        </div>
+        <div class="profile-card"><div class="profile-meta"><span class="result-label">POLA YANG TERLIHAT</span><strong id="profile-name"></strong></div><p id="profile-description"></p><div class="profile-chips" id="profile-chips"></div></div>
+        <div class="recommend-card"><div><span class="result-label">CARA PENDAMPINGAN YANG DISARANKAN</span><h2 id="method-protocol-title"></h2><p id="method-protocol-copy"></p></div><div class="session-plan"><h3>Contoh pola sesi</h3><div id="method-plan-list"></div></div></div>
       </div>
+      <div class="result-actions"><button id="download-method-btn" class="primary-btn">Download Hasil PDF</button><a id="whatsapp-method-btn" class="secondary-btn link-btn" target="_blank" rel="noreferrer">Konsultasi via WhatsApp ↗</a><button id="back-home-from-method" class="text-btn">← Kembali ke Home</button></div>
     </section>
   </main>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="app.js"></script>
 </body>
 </html>
