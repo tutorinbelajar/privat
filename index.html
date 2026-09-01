@@ -3,34 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Tutorin Academic Check — cek kebutuhan bimbel privat dan profil belajar anak." />
-  <title>Tutorin Academic Check</title>
+  <meta name="description" content="Tutorin Academic Check — pahami tantangan belajar anak dan tentukan langkah pendampingan yang paling sesuai." />
+  <title>Tutorin — Kenali Kebutuhan Belajar Anak</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="./" aria-label="Tutorin Academic Check">Tutorin</a>
+    <a class="brand" href="./" aria-label="Tutorin">Tutorin</a>
     <span class="brand-sub">Academic Check</span>
   </header>
 
   <main>
     <section id="start-screen" class="screen active">
       <div class="hero-card">
-        <div class="eyebrow">PERSONALIZED LEARNING</div>
-        <h1>Anak butuh les privat atau sebenarnya bisa belajar mandiri?</h1>
-        <p class="lead">Cari tahu berdasarkan target, kondisi akademik, kemandirian belajar, dan urgensi anak.</p>
-        <div class="benefits">
-          <span>✓ Gratis</span><span>✓ ±5 menit</span><span>✓ Hasil personal</span>
-        </div>
+        <div class="eyebrow">LEARNING NEED CHECK</div>
+        <h1>Kenapa anak sulit belajar, dan apakah ia perlu les?</h1>
+        <p class="lead">Jawab 10 pertanyaan sederhana tentang kondisi belajar anak. Dalam ±3 menit, Anda akan mendapat gambaran masalah utama, apakah perlu pendampingan, dan apa langkah yang bisa dicoba.</p>
+        <div class="benefits"><span>✓ Gratis</span><span>✓ ±3 menit</span><span>✓ Hasil personal</span></div>
         <button class="primary-btn" id="start-btn">Mulai Assessment <span>→</span></button>
-        <p class="microcopy">Tidak ada jawaban benar atau salah. Jawab sesuai kondisi anak saat ini.</p>
+        <p class="microcopy">Tidak ada jawaban benar atau salah. Jawab berdasarkan kondisi anak dalam 3 bulan terakhir.</p>
       </div>
       <div class="how-card">
-        <h2>Apa yang akan diketahui?</h2>
+        <h2>Yang akan Anda dapatkan</h2>
         <div class="how-grid">
-          <article><b>01</b><h3>Kebutuhan</h3><p>Apakah pendampingan tambahan diperlukan.</p></article>
-          <article><b>02</b><h3>Masalah utama</h3><p>Gap konsep, latihan, konsistensi, atau strategi.</p></article>
-          <article><b>03</b><h3>Rekomendasi</h3><p>Self-study, coaching, atau privat terarah.</p></article>
+          <article><b>01</b><h3>Tantangan utama</h3><p>Apakah masalah terbesar ada pada konsep, kebiasaan, kemandirian, atau ketahanan belajar.</p></article>
+          <article><b>02</b><h3>Perlu les atau tidak?</h3><p>Rekomendasi awal yang tidak otomatis mengarahkan semua anak ke privat.</p></article>
+          <article><b>03</b><h3>Apa yang harus dilakukan?</h3><p>Langkah praktis yang bisa dicoba orang tua dan bentuk pendampingan yang sesuai.</p></article>
         </div>
       </div>
     </section>
@@ -46,9 +44,6 @@
           <h2 id="question-title"></h2>
           <p id="question-help" class="question-help"></p>
           <div id="options" class="options"></div>
-          <div id="text-answer" class="text-answer hidden">
-            <textarea id="answer-text" rows="4" placeholder="Tulis singkat di sini..."></textarea>
-          </div>
         </div>
         <div class="assessment-nav">
           <button id="back-btn" class="secondary-btn" type="button">← Kembali</button>
@@ -59,52 +54,59 @@
 
     <section id="result-screen" class="screen">
       <div class="result-shell">
-        <div class="eyebrow">HASIL SCREENING</div>
-        <h1 id="result-title">Rekomendasi awal untuk anak</h1>
+        <div class="eyebrow">HASIL UNTUK ORANG TUA</div>
+        <h1 id="result-title">Gambaran kebutuhan belajar anak</h1>
         <p id="result-summary" class="lead"></p>
 
+        <div class="result-hero-card">
+          <span class="result-label">KESIMPULAN UTAMA</span>
+          <h2 id="parent-conclusion"></h2>
+          <p id="parent-conclusion-copy"></p>
+        </div>
+
         <div class="result-grid">
-          <div class="result-card emphasis">
-            <span class="result-label">KEBUTUHAN PRIVAT</span>
-            <strong id="need-level"></strong>
-            <p id="need-copy"></p>
+          <div class="result-card"><span class="result-label">KONDISI AKADEMIK</span><strong id="academic-level"></strong><p id="academic-copy"></p></div>
+          <div class="result-card"><span class="result-label">KEMANDIRIAN</span><strong id="independence-level"></strong><p id="independence-copy"></p></div>
+          <div class="result-card"><span class="result-label">KEBIASAAN BELAJAR</span><strong id="habit-level"></strong><p id="habit-copy"></p></div>
+          <div class="result-card"><span class="result-label">RESPONS SAAT SULIT</span><strong id="resilience-level"></strong><p id="resilience-copy"></p></div>
+          <div class="result-card full"><span class="result-label">TANTANGAN YANG PALING MENONJOL</span><div id="focus-tags" class="tag-row"></div><p id="focus-explanation"></p></div>
+        </div>
+
+        <div class="action-card">
+          <div class="action-copy">
+            <span class="result-label">APA YANG SEBAIKNYA DILAKUKAN?</span>
+            <h2 id="action-title"></h2>
+            <p id="action-copy"></p>
           </div>
-          <div class="result-card">
-            <span class="result-label">URGENSI</span>
-            <strong id="urgency-level"></strong>
-            <p id="urgency-copy"></p>
-          </div>
-          <div class="result-card full">
-            <span class="result-label">FOKUS UTAMA</span>
-            <div id="focus-tags" class="tag-row"></div>
-          </div>
+          <div class="action-list" id="action-list"></div>
         </div>
 
         <div class="recommend-card">
           <div>
-            <span class="result-label">REKOMENDASI</span>
+            <span class="result-label">PERLUKAH PENDAMPINGAN?</span>
             <h2 id="recommendation-title"></h2>
             <p id="recommendation-copy"></p>
+            <div id="recommendation-cta-wrap" class="cta-wrap"></div>
           </div>
           <div class="session-plan">
-            <h3>Contoh struktur 90 menit</h3>
+            <h3 id="session-plan-title">Contoh pola pendampingan</h3>
             <div id="session-plan-list"></div>
           </div>
         </div>
 
         <div class="next-card">
           <div>
-            <span class="result-label">LANGKAH BERIKUTNYA</span>
-            <h2>Ingin tahu metode belajar yang paling cocok?</h2>
-            <p>Lanjutkan ke Learning Method Check untuk mendapatkan profil belajar dan pola sesi yang lebih personal.</p>
+            <span class="result-label">PERSONALISASI</span>
+            <h2>Ingin tahu cara belajar yang lebih cocok?</h2>
+            <p>Jawab 6 pertanyaan tambahan untuk melihat preferensi belajar dan pola sesi yang lebih sesuai. Ini bukan label “tipe belajar” yang kaku, tetapi panduan untuk menyesuaikan cara tutor mendampingi anak.</p>
           </div>
           <button id="method-btn" class="primary-btn">Lanjut ke Learning Method →</button>
         </div>
 
         <div class="contact-card">
-          <h2>Butuh bantuan menyusun program anak?</h2>
-          <p>Hasil ini adalah screening awal. Diagnostic Test dapat dipakai untuk memastikan materi yang perlu ditangani.</p>
-          <a class="secondary-link" href="https://wa.me/6280000000000?text=Halo%20Tutorin%2C%20saya%20ingin%20konsultasi%20hasil%20Academic%20Check." target="_blank" rel="noreferrer">Konsultasi via WhatsApp ↗</a>
+          <h2>Catatan untuk orang tua</h2>
+          <p>Hasil ini adalah screening awal, bukan diagnosis akademik. Jika tantangan anak menetap, diagnostic test dapat digunakan untuk memastikan materi yang perlu diperkuat.</p>
+          <a class="secondary-link" href="https://wa.me/6280000000000?text=Halo%20Tutorin%2C%20saya%20ingin%20konsultasi%20hasil%20Academic%20Check." target="_blank" rel="noreferrer">Konsultasi hasil ↗</a>
         </div>
 
         <button id="restart-btn" class="text-btn">Ulangi assessment</button>
@@ -114,7 +116,7 @@
     <section id="method-screen" class="screen" aria-live="polite">
       <div class="assessment-shell">
         <div class="progress-wrap">
-          <div class="progress-top"><span id="method-step-label">Learning Method 1</span><span id="method-progress-label">0%</span></div>
+          <div class="progress-top"><span id="method-step-label">Pertanyaan 1</span><span id="method-progress-label">0%</span></div>
           <div class="progress-track"><div id="method-progress-bar" class="progress-bar"></div></div>
         </div>
         <div class="question-card">
@@ -132,17 +134,17 @@
 
     <section id="method-result-screen" class="screen">
       <div class="result-shell">
-        <div class="eyebrow">LEARNING PROFILE</div>
+        <div class="eyebrow">PROFIL PREFERENSI BELAJAR</div>
         <h1 id="profile-title"></h1>
         <p id="profile-summary" class="lead"></p>
         <div class="profile-card">
-          <div class="profile-meta"><span class="result-label">POLA UTAMA</span><strong id="profile-name"></strong></div>
+          <div class="profile-meta"><span class="result-label">POLA YANG TERLIHAT</span><strong id="profile-name"></strong></div>
           <p id="profile-description"></p>
           <div class="profile-chips" id="profile-chips"></div>
         </div>
         <div class="recommend-card">
           <div>
-            <span class="result-label">90-MINUTE LEARNING PROTOCOL</span>
+            <span class="result-label">POLA SESI YANG DISARANKAN</span>
             <h2 id="method-protocol-title"></h2>
             <p id="method-protocol-copy"></p>
           </div>
@@ -152,7 +154,7 @@
           <div>
             <span class="result-label">TAHAP SELANJUTNYA</span>
             <h2>Validasi dengan Diagnostic Test</h2>
-            <p>Untuk memastikan gap materi dan menentukan tutor yang paling sesuai, lanjutkan dengan tes akademik berdasarkan jenjang dan tujuan anak.</p>
+            <p>Gunakan tes akademik sesuai jenjang dan tujuan anak untuk memastikan gap materi sebelum menyusun program belajar.</p>
           </div>
           <button id="method-restart-btn" class="primary-btn">Mulai Lagi</button>
         </div>
