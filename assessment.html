@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#005b38">
+<meta name="description" content="Asesmen Tutorin untuk membantu orang tua memahami kebutuhan dan metode belajar anak.">
+<title>Asesmen Tutorin — Kenali Kebutuhan Belajar Anak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+body.assessment-page{background:#f6faf7;color:#123d2b;min-height:100vh}
+.assessment-app{min-height:100vh;display:flex;flex-direction:column}
+.assessment-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid #d8e5dc}
+.assessment-header-inner{width:min(920px,calc(100% - 32px));margin:auto;height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.assessment-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:#123d2b;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif}
+.assessment-brand-mark{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#005b38;color:#fff;font-weight:800}
+.assessment-header-note{font-size:12px;color:#63756c}
+.assessment-main{width:min(920px,calc(100% - 32px));margin:auto;flex:1;display:flex;align-items:flex-start;padding:40px 0 76px}
+.assessment-stage{width:100%}
+.assessment-intro{max-width:680px;margin:28px auto 34px;text-align:center}
+.assessment-intro .section-kicker{color:#087044}
+.assessment-intro h1{font:800 clamp(34px,6vw,52px)/1.08 'Plus Jakarta Sans',sans-serif;margin:10px 0 14px;letter-spacing:-.03em}
+.assessment-intro p{font-size:16px;line-height:1.7;color:#63756c;margin:0 auto;max-width:600px}
+.assessment-meta{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:18px}
+.assessment-meta span{padding:8px 12px;border-radius:999px;background:#eaf6ee;color:#256044;font-size:12px;font-weight:700}
+.assessment-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;max-width:760px;margin:0 auto}
+.assessment-choice{display:flex;flex-direction:column;min-height:330px;padding:26px;border:1px solid #cfe0d5;border-radius:24px;background:#fff;box-shadow:0 16px 40px rgba(5,66,39,.06);text-decoration:none;color:inherit;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.assessment-choice:hover{transform:translateY(-3px);border-color:#087044;box-shadow:0 20px 48px rgba(5,66,39,.10)}
+.choice-badge{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#e8f5ed;color:#087044;font-weight:900;margin-bottom:22px}
+.assessment-choice h2{font:800 25px/1.2 'Plus Jakarta Sans',sans-serif;margin:0 0 11px}
+.assessment-choice p{font-size:14px;line-height:1.7;color:#63756c;margin:0}
+.choice-audience{margin-top:18px;font-size:12px;font-weight:800;color:#087044}
+.choice-footer{margin-top:auto;padding-top:24px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;color:#005b38}
+.choice-footer span:last-child{font-size:22px}
+.assessment-disclaimer{max-width:720px;margin:24px auto 0;text-align:center;font-size:11px;line-height:1.6;color:#87968e}
+.flow-screen,.result-screen{display:none}.flow-screen.active,.result-screen.active{display:block}
+.assessment-flow-shell{max-width:700px;margin:0 auto}
+.flow-top{margin-bottom:22px}
+.flow-back{border:0;background:transparent;padding:8px 0;color:#507165;font-weight:700;cursor:pointer}
+.flow-progress{height:8px;background:#e2eee6;border-radius:999px;overflow:hidden;margin-top:14px}
+.flow-progress>div{height:100%;width:0;background:#087044;border-radius:inherit;transition:width .2s ease}
+.flow-step-row{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:#708078;margin-top:9px}
+.flow-card{background:#fff;border:1px solid #d7e5dc;border-radius:24px;padding:30px;box-shadow:0 16px 42px rgba(5,66,39,.06)}
+.flow-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#087044;font-weight:900}
+.flow-card h1{font:800 clamp(27px,5vw,38px)/1.18 'Plus Jakarta Sans',sans-serif;letter-spacing:-.025em;margin:9px 0 11px}
+.flow-help{font-size:14px;line-height:1.65;color:#6a7a72;margin-bottom:22px}
+.assessment-options{display:grid;gap:11px}
+.assessment-options .option{width:100%;text-align:left;border:1px solid #ceddd4;background:#fff;border-radius:16px;padding:16px;font:600 14px/1.45 'DM Sans',sans-serif;color:#25483a;cursor:pointer;transition:.15s ease}
+.assessment-options .option:hover{background:#f1f8f3;border-color:#9fc8ae}
+.assessment-options .option.selected{background:#e8f5ed;border-color:#087044;color:#0b5a3b;box-shadow:0 0 0 2px rgba(8,112,68,.08)}
+.flow-actions{display:flex;justify-content:space-between;gap:12px;margin-top:22px}
+.flow-actions button{border:0;border-radius:14px;padding:13px 18px;font-weight:800;cursor:pointer}
+.flow-actions .secondary{background:#edf5f0;color:#35614e}.flow-actions .primary{background:#f4c51b;color:#123d2b}.flow-actions button:disabled{opacity:.42;cursor:not-allowed}
+.result-wrap{max-width:760px;margin:0 auto}.result-hero{text-align:center;margin:20px auto 24px}.result-hero h1{font:800 clamp(31px,6vw,48px)/1.1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;margin:10px 0}.result-hero p{max-width:620px;margin:auto;color:#63756c;line-height:1.7}
+.result-grid{display:grid;gap:16px}.result-panel{background:#fff;border:1px solid #d7e5dc;border-radius:22px;padding:24px}.result-panel h2{font:800 20px 'Plus Jakarta Sans',sans-serif;margin:0 0 10px}.result-panel p{color:#63756c;line-height:1.7;margin:0}.result-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.result-tags span{background:#eaf6ee;color:#256044;padding:8px 11px;border-radius:999px;font-size:12px;font-weight:700}.result-actions{display:flex;gap:11px;margin-top:20px;flex-wrap:wrap}.result-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:800}.result-actions .wa{background:#f4c51b;color:#123d2b}.result-actions .home-link{background:#edf5f0;color:#35614e}
+@media(max-width:700px){.assessment-header-inner,.assessment-main{width:min(100% - 20px,920px)}.assessment-header-inner{height:62px}.assessment-header-note{display:none}.assessment-main{padding:24px 0 56px}.assessment-intro{margin:18px auto 26px}.assessment-intro h1{font-size:34px}.assessment-choice-grid{grid-template-columns:1fr;gap:12px}.assessment-choice{min-height:0;padding:22px;border-radius:20px}.flow-card{padding:21px;border-radius:20px}.flow-actions{position:sticky;bottom:10px;background:rgba(246,250,247,.94);padding-top:10px}.result-panel{padding:20px;border-radius:20px}.result-actions{flex-direction:column}.result-actions a{width:100%}}
+</style>
+</head>
+<body class="assessment-page">
+<div class="assessment-app">
+<header class="assessment-header">
+<div class="assessment-header-inner"><a class="assessment-brand" href="index.html"><span class="assessment-brand-mark">T</span><span>Tutorin</span></a><span class="assessment-header-note">Asesmen kebutuhan belajar</span></div>
+</header>
+<main class="assessment-main">
+<section class="assessment-stage">
+<div id="choice-screen" class="flow-screen active">
+<div class="assessment-intro"><span class="section-kicker">ASESMEN TUTORIN</span><h1>Kenali dulu kebutuhan belajar anak.</h1><p>Jangan mulai dari memilih tutor. Mulai dari memahami apakah anak membutuhkan pendampingan dan pendekatan belajar seperti apa yang paling sesuai.</p><div class="assessment-meta"><span>Gratis</span><span>Hasil langsung</span><span>Tanpa diagnosis</span></div></div>
+<div class="assessment-choice-grid">
+<a class="assessment-choice" href="#need" data-assessment="need"><span class="choice-badge">01</span><h2>Apakah Anak Membutuhkan Les Privat?</h2><p>Membantu orang tua melihat kebutuhan pendampingan berdasarkan kesulitan akademik, kemandirian, kebiasaan belajar, fokus, dan target.</p><div class="choice-audience">Untuk orang tua · ±3–4 menit</div><div class="choice-footer"><span>Mulai asesmen</span><span>→</span></div></a>
+<a class="assessment-choice" href="#method" data-assessment="method"><span class="choice-badge">02</span><h2>Metode Belajar Privat yang Cocok</h2><p>Membantu memetakan pendekatan belajar yang cenderung cocok, seperti terstruktur, guided practice, active/socratic, atau challenge-based.</p><div class="choice-audience">Untuk orang tua &amp; anak · ±4–5 menit</div><div class="choice-footer"><span>Mulai asesmen</span><span>→</span></div></a>
+</div>
+<p class="assessment-disclaimer">Hasil asesmen adalah screening awal untuk membantu diskusi, bukan diagnosis psikologis atau medis.</p>
+</div>
+<div id="flow-screen" class="flow-screen"></div>
+<div id="result-screen" class="result-screen"></div>
+</section>
+</main>
+</div>
+<script src="app.js"></script>
+<script>
+const assessmentHost=document.getElementById('flow-screen');
+const resultHost=document.getElementById('result-screen');
+const choiceScreen=document.getElementById('choice-screen');
+const originalMain=document.querySelector('main');
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+let currentMode=null;
+function resetAssessmentPage(){currentMode=null;choiceScreen.classList.add('active');assessmentHost.classList.remove('active');resultHost.classList.remove('active');history.replaceState(null,'',location.pathname);window.scrollTo(0,0)}
+function buildChoiceFlow(mode){
+currentMode=mode;choiceScreen.classList.remove('active');assessmentHost.classList.add('active');resultHost.classList.remove('active');
+const isNeed=mode==='need',qs=isNeed?needQuestions:methodQuestions,total=qs.length;
+assessmentHost.innerHTML=`<div class="assessment-flow-shell"><div class="flow-top"><button class="flow-back" type="button" id="page-back">← Pilih asesmen lain</button><div class="flow-progress"><div id="page-progress"></div></div><div class="flow-step-row"><span id="page-step">Pertanyaan 1 dari ${total}</span><span id="page-percent">0%</span></div></div><div class="flow-card"><div class="flow-kicker" id="page-kicker">${isNeed?'ASESMEN KEBUTUHAN':'ASESMEN METODE BELAJAR'}</div><h1 id="page-title"></h1><p class="flow-help">Pilih jawaban yang paling menggambarkan kondisi anak saat ini.</p><div class="assessment-options" id="page-options"></div><div class="flow-actions"><button class="secondary" id="page-prev" type="button">Kembali</button><button class="primary" id="page-next" type="button">Lanjut →</button></div></div></div>`;
+const state=isNeed?needState:methodState;state.a={};state.i=0;
+const render=()=>{
+const q=isNeed?needQuestions[state.i]:methodQuestions[state.i];const prompt=isNeed?q.q:q[1],opts=isNeed?q.o:q[2],p=Math.round((state.i+1)/total*100);
+document.getElementById('page-step').textContent=`Pertanyaan ${state.i+1} dari ${total}`;document.getElementById('page-percent').textContent=p+'%';document.getElementById('page-progress').style.width=p+'%';document.getElementById('page-title').textContent=prompt;
+document.getElementById('page-options').innerHTML=opts.map((x,n)=>`<button type="button" class="option ${state.a[state.i]===n?'selected':''}" data-n="${n}">${esc(x)}</button>`).join('');document.querySelectorAll('#page-options .option').forEach(btn=>btn.onclick=()=>{state.a[state.i]=Number(btn.dataset.n);render()});
+document.getElementById('page-prev').disabled=state.i===0;document.getElementById('page-next').disabled=state.a[state.i]===undefined;document.getElementById('page-next').textContent=state.i===total-1?'Lihat Hasil →':'Lanjut →';window.scrollTo(0,0)};
+document.getElementById('page-back').onclick=resetAssessmentPage;
+document.getElementById('page-prev').onclick=()=>{if(state.i>0){state.i--;render()}};
+document.getElementById('page-next').onclick=()=>{if(state.a[state.i]===undefined)return;if(state.i<total-1){state.i++;render()}else{renderAssessmentResult(mode)}};render();
+history.replaceState(null,'',location.pathname+'#'+mode);
+}
+function renderAssessmentResult(mode){
+const isNeed=mode==='need';resultHost.classList.add('active');assessmentHost.classList.remove('active');
+if(isNeed){let total=0;needQuestions.forEach((q,i)=>total+=(q.s[needState.a[i]]||0));let title=total<=8?'Anak relatif mampu belajar mandiri':total<=18?'Anak berpotensi terbantu dengan pendampingan':'Anak berpotensi mendapatkan manfaat besar dari les privat';let copy=total<=8?'Fokus awal dapat diarahkan pada rutinitas, target belajar, dan bantuan pada materi tertentu. Les privat belum tentu menjadi kebutuhan rutin.':total<=18?'Pendampingan pada materi atau target tertentu dapat membantu, terutama jika diberikan secara terarah dan dievaluasi berkala.':'Kesulitan, target, dan kebutuhan pendampingan menunjukkan bahwa bimbingan privat terstruktur berpotensi memberi manfaat.';resultHost.innerHTML=`<div class="result-wrap"><div class="result-hero"><span class="section-kicker">HASIL SCREENING</span><h1>${esc(title)}</h1><p>${esc(copy)}</p></div><div class="result-grid"><section class="result-panel"><h2>Yang perlu diperhatikan</h2><p>Hasil paling berguna bila dibahas bersama kondisi nyata anak, mata pelajaran, dan target belajarnya.</p><div class="result-tags"><span>Pemahaman materi</span><span>Kemandirian</span><span>Kebiasaan belajar</span><span>Respons saat sulit</span></div></section><section class="result-panel"><h2>Langkah berikutnya</h2><p>Tentukan 1–2 target utama, fokus pada kesulitan yang paling nyata, lalu pantau perkembangannya secara berkala.</p><div class="result-actions"><a class="wa" target="_blank" rel="noreferrer" href="https://wa.me/6283155365009?text=Halo%20Tutorin,%20saya%20sudah%20mengisi%20Asesmen%20Kebutuhan%20Les%20Privat.%20Saya%20ingin%20konsultasi%20mengenai%20hasilnya.">Konsultasikan hasil →</a><a class="home-link" href="index.html">Kembali ke Tutorin</a></div></section></div></div>`;
+}else{const codes=methodQuestions.map((q,i)=>q[3][methodState.a[i]]),count=c=>codes.filter(x=>x===c).length;let p=count('structured')+count('step')+count('reteach')+count('example')>=4?'structured':count('confidence')+count('help')>=2?'confidence':count('challenge')+count('target')+count('monitor')+count('independent')>=4?'challenge':'active';const profile=profiles[p];resultHost.innerHTML=`<div class="result-wrap"><div class="result-hero"><span class="section-kicker">HASIL ASESMEN METODE BELAJAR</span><h1>${esc(profile[0])}</h1><p>${esc(profile[1])}</p></div><div class="result-grid"><section class="result-panel"><h2>Pola belajar yang disarankan</h2><p>${esc(profile[2])}</p><div class="result-tags"><span>Instruksi sesuai kebutuhan</span><span>Feedback</span><span>Latihan bertahap</span></div></section><section class="result-panel"><h2>Langkah berikutnya</h2><p>Hasil ini menjadi bahan untuk menyesuaikan pendekatan tutor dengan kebutuhan anak, target, dan materi yang dipelajari.</p><div class="result-actions"><a class="wa" target="_blank" rel="noreferrer" href="https://wa.me/6283155365009?text=Halo%20Tutorin,%20saya%20sudah%20mengisi%20Asesmen%20Metode%20Belajar.%20Saya%20ingin%20konsultasi%20mengenai%20hasilnya.">Konsultasikan hasil →</a><a class="home-link" href="index.html">Kembali ke Tutorin</a></div></section></div></div>`;}
+window.scrollTo(0,0);
+}
+function routeAssessment(){const h=location.hash.replace('#','');if(h==='need'||h==='method')buildChoiceFlow(h);else if(h==='result'){}else resetAssessmentPage()}
+window.addEventListener('hashchange',routeAssessment);routeAssessment();
+</script>
+</body>
+</html>
