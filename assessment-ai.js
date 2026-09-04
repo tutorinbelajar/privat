@@ -105,6 +105,7 @@
     const type = path === 'assessment-need.html' ? 'need' : path === 'assessment-method.html' ? 'method' : null;
     if (!type) return;
     removeMethodIndicator(result);
+    if (isMethodPage()) return;
     const payload = type === 'need' ? getNeedAnalysis() : getMethodAnalysis();
     if (!payload) return;
     result.dataset.aiRequested = '1';
