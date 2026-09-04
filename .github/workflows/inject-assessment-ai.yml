@@ -15,32 +15,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Wire assessment result actions
+      - name: Wire assessment persistence
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
 
-          p = Path('assessment-method.html')
-          if not p.exists():
-              raise SystemExit('assessment-method.html not found')
-          text = p.read_text(encoding='utf-8')
-          tag = '<script src="assessment-result-actions.js?v=20260904-1"></script>'
-          if 'assessment-result-actions.js' not in text:
-              text = text.replace('</body>', tag + '</body>')
-              p.write_text(text, encoding='utf-8')
-              print('Added assessment-result-actions.js')
-          else:
-              print('assessment-result-actions.js already wired')
-          
-          ai = Path('assessment-ai.js').read_text(encoding='utf-8')
-          if 'tutorin:assessment-complete' not in ai or 'fetch(ENDPOINT' not in ai:
-              raise SystemExit('Assessment AI client wiring check failed')
-          
-          method = p.read_text(encoding='utf-8')
-          if 'assessment-result-actions.js' not in method:
-              raise SystemExit('Result actions script was not wired')
-          print('Assessment result actions wiring OK')
+          for filename in ('assessment-method.html', 'assessment-need.html'):
+              p = Path(filename)
+              if not p.exists():
+                  raise SystemExit(f'{filename} not found')
+              text = p.read_text(encoding='utf-8')
+              tag = '<script src="assessment-persistence.js?v=20260904-1"></script>'
+              if 'assessment-persistence.js' not in text:
+                  text = text.replace('</body>', tag + '</body>')
+                  p.write_text(text, encoding='utf-8')
+                  print(f'Added persistence to {filename}')
+              else:
+                  print(f'Persistence already wired in {filename}')
+
+          persistence = Path('assessment-persistence.js')
+          if not persistence.exists():
+              raise SystemExit('assessment-persistence.js not found')
+          print('Assessment persistence wiring OK')
           PY
       - name: Commit wiring if changed
         run: |
@@ -49,7 +45,7 @@ jobs:
           if git diff --quiet; then
             echo 'No changes to commit'
           else
-            git add assessment-method.html
-            git commit -m 'Wire assessment result actions [skip ci]'
+            git add assessment-method.html assessment-need.html
+            git commit -m 'Wire assessment persistence [skip ci]'
             git push
           fi
