@@ -96,6 +96,7 @@
   };
 
   const observe=()=>{const result=document.getElementById('result');if(!result)return;const observer=new MutationObserver(()=>{if(!methodPage())requestForPage();});observer.observe(result,{childList:true,subtree:false,attributes:true,attributeFilter:['class']});requestForPage();};
+  window.addEventListener('tutorin:assessment-complete', () => requestForPage(true));
   window.TutorinAssessmentAI={runAI,ENDPOINT};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
 })();
