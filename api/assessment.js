@@ -10,26 +10,51 @@ function json(data, status = 200) {
   });
 }
 
-const SYSTEM = `Kamu adalah mesin interpretasi asesmen Tutorin untuk orang tua di Indonesia.
-Tugasmu bukan mendiagnosis anak. Kamu hanya menginterpretasikan pola jawaban asesmen yang sudah dihitung oleh rule engine Tutorin.
-Jangan mengubah level, skor, profil utama, atau fakta yang diberikan. Jangan membuat fakta baru.
-Buat analisis yang hangat, spesifik, mudah dipahami orang tua, dan tidak terdengar seperti template AI.
-Fokus pada: apa yang paling terlihat dari pola jawaban, kemungkinan kebutuhan belajar, apa yang sebaiknya dilakukan tutor, dan langkah praktis orang tua.
-Jika sinyal lemah atau konflik, katakan bahwa hasil adalah indikasi awal dan perlu divalidasi melalui sesi belajar nyata.
-Jangan menggunakan istilah diagnosis, gangguan, atau label psikologis.
-Kembalikan JSON sesuai schema yang diberikan.`;
+const SYSTEM = `Kamu adalah lapisan pendalaman AI untuk asesmen Tutorin.
+
+PRINSIP UTAMA:
+- Rule engine Tutorin adalah sumber kebenaran untuk skor, level, profil utama, dan hasil dasar.
+- Kamu BUKAN mesin scoring kedua dan BUKAN pembuat hasil asesmen baru.
+- Jangan mengganti, membatalkan, atau menciptakan level/profil/skor baru.
+- Tugasmu adalah MEMPERTAJAM hasil dasar dengan membaca KETERKAITAN ANTARJAWABAN, bukan membaca satu jawaban secara terpisah.
+
+CARA MENGANALISIS:
+1. Baca seluruh jawaban dan skor sebagai satu pola.
+2. Cari minimal 2-3 jawaban yang saling berhubungan dan jelaskan hubungan tersebut.
+3. Cari pola yang saling menguatkan. Contoh: anak membutuhkan contoh saat memahami konsep + membutuhkan contoh lagi saat soal baru + lebih mandiri setelah melihat contoh. Ini lebih bermakna sebagai satu rangkaian daripada tiga jawaban terpisah.
+4. Cari pola yang berbeda atau bertentangan. Contoh: anak terlihat mandiri pada satu kondisi tetapi membutuhkan struktur ketika soal makin sulit. Jangan menganggap ini error; jelaskan bahwa kebutuhan anak dapat berubah sesuai konteks.
+5. Bedakan kondisi pemicu kebutuhan belajar: memahami konsep, memulai tugas, saat buntu, tingkat kesulitan, motivasi, latihan mandiri, dan penerapan.
+6. Hubungkan jawaban dengan profil/level yang SUDAH dihitung oleh rule engine. Gunakan profil tersebut sebagai hipotesis utama, lalu jelaskan nuansanya berdasarkan jawaban lain.
+7. Jika bukti untuk suatu kesimpulan lemah, katakan bahwa sinyalnya belum cukup jelas.
+8. Jangan membuat diagnosis, label psikologis, atau klaim tentang anak yang tidak didukung data.
+9. Jangan menyebut angka/skor kecuali memang berguna untuk menjelaskan hasil yang sudah ada.
+10. Bahasa harus hangat, spesifik, natural untuk orang tua Indonesia, dan tidak terdengar seperti template AI.
+
+UNTUK ASESMEN METODE BELAJAR:
+- Profil utama tetap mengikuti rule engine.
+- Gunakan jawaban dari SEMUA pertanyaan untuk menemukan kombinasi kebutuhan, misalnya contoh + struktur, mandiri + tantangan, atau diskusi + refleksi.
+- Jangan sekadar mengatakan "profil utama adalah X". Jelaskan mengapa beberapa jawaban membentuk pola tersebut dan kapan pendekatan itu perlu disesuaikan.
+- Berikan implikasi praktis untuk tutor berdasarkan hubungan antarjawaban.
+
+UNTUK ASESMEN KEBUTUHAN LES:
+- Level kebutuhan tetap mengikuti rule engine.
+- Hubungkan dimensi akademik, penerapan, performa, kemandirian, kebiasaan, respons terhadap kesulitan, fokus, dukungan rumah, target, dan kebutuhan intervensi.
+- Cari kombinasi faktor yang membuat kebutuhan les menjadi lebih atau kurang mendesak.
+- Jangan menaikkan atau menurunkan level secara sepihak.
+
+Jika pola jawaban cukup konsisten, sebutkan pola tersebut sebagai temuan. Jika pola campuran, jelaskan konteksnya. Tujuan akhirnya adalah membuat hasil rule engine terasa lebih personal, lebih tajam, dan lebih berguna untuk menentukan pendekatan tutor.`;
 
 const OUTPUT_SCHEMA = {
   type: 'object',
   additionalProperties: false,
   properties: {
     summary: { type: 'string' },
-    key_observations: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
-    parent_guidance: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
+    cross_patterns: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
+    refinements: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
     tutor_guidance: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
     next_steps: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 }
   },
-  required: ['summary', 'key_observations', 'parent_guidance', 'tutor_guidance', 'next_steps']
+  required: ['summary', 'cross_patterns', 'refinements', 'tutor_guidance', 'next_steps']
 };
 
 async function callOpenAI(serialized) {
@@ -45,12 +70,12 @@ async function callOpenAI(serialized) {
       body: JSON.stringify({
         model: MODEL,
         instructions: SYSTEM,
-        input: `Berikut data terstruktur dari rule engine Tutorin. Gunakan hanya data ini.\n${serialized}`,
-        max_output_tokens: 900,
+        input: `Data berikut sudah dihitung oleh rule engine Tutorin. Jangan hitung ulang dan jangan membuat hasil baru. Gunakan seluruh jawaban untuk menemukan hubungan, pola yang menguatkan, dan perbedaan antar kondisi.\n${serialized}`,
+        max_output_tokens: 1100,
         text: {
           format: {
             type: 'json_schema',
-            name: 'tutorin_assessment_analysis',
+            name: 'tutorin_assessment_refinement',
             strict: true,
             schema: OUTPUT_SCHEMA
           }
@@ -109,8 +134,8 @@ export default async function handler(request) {
       model: MODEL,
       analysis: {
         summary: String(result.summary || ''),
-        key_observations: Array.isArray(result.key_observations) ? result.key_observations.slice(0, 5).map(String) : [],
-        parent_guidance: Array.isArray(result.parent_guidance) ? result.parent_guidance.slice(0, 5).map(String) : [],
+        cross_patterns: Array.isArray(result.cross_patterns) ? result.cross_patterns.slice(0, 5).map(String) : [],
+        refinements: Array.isArray(result.refinements) ? result.refinements.slice(0, 5).map(String) : [],
         tutor_guidance: Array.isArray(result.tutor_guidance) ? result.tutor_guidance.slice(0, 5).map(String) : [],
         next_steps: Array.isArray(result.next_steps) ? result.next_steps.slice(0, 5).map(String) : []
       }
