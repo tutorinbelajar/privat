@@ -1,4 +1,4 @@
-const MODEL = process.env.OPENAI_MODEL || 'gpt-5.6-luna';
+const MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -34,10 +34,7 @@ export default async function handler(request) {
 
     const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-      },
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
       body: JSON.stringify({
         model: MODEL,
         instructions: SYSTEM,
@@ -57,9 +54,8 @@ export default async function handler(request) {
     if (!text) return json({ error: 'AI returned no analysis' }, 502);
 
     let result;
-    try {
-      result = JSON.parse(text);
-    } catch {
+    try { result = JSON.parse(text); }
+    catch {
       const match = text.match(/\{[\s\S]*\}/);
       if (!match) return json({ error: 'AI returned invalid analysis' }, 502);
       result = JSON.parse(match[0]);
