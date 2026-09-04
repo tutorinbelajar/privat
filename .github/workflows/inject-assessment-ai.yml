@@ -14,40 +14,60 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Inject AI client with cache busting
+      - name: Make assessment AI-first
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
 
-          tag = '<script src="assessment-ai.js?v=20260904-2"></script>'
+          tag = '<script src="assessment-ai.js?v=20260904-3"></script>'
           pattern = r'<script\s+src=["\']assessment-ai\.js(?:\?[^"\']*)?["\']\s*></script>'
 
+          # Always use a fresh client version and make the method result a pure AI handoff.
           for name in ('assessment-need.html', 'assessment-method.html'):
               p = Path(name)
               if not p.exists():
                   continue
-
               text = p.read_text(encoding='utf-8')
-              updated = re.sub(pattern, tag, text)
+              text = re.sub(pattern, tag, text)
+              if tag not in text:
+                  text = text.replace('</body>', tag + '</body>', 1)
+              p.write_text(text, encoding='utf-8')
 
-              if tag not in updated:
-                  marker = '</body>'
-                  if marker not in updated:
-                      raise SystemExit(f'Missing {marker} in {name}')
-                  updated = updated.replace(marker, tag + marker, 1)
+          p = Path('assessment-method.html')
+          if p.exists():
+              text = p.read_text(encoding='utf-8')
+              start = text.find('function result(){')
+              end = text.find("\n $('next').onclick=", start)
+              if start >= 0 and end > start:
+                  replacement = """function result(){
+          $('flow').classList.add('hide');
+          $('intro').classList.add('hide');
+          $('result').classList.remove('hide');
+          $('result').innerHTML='<section class=\"panel ai-loading-host\"><span class=\"k\">HASIL PEMETAAN CARA BELAJAR</span><h1>Menganalisis pola belajar anak…</h1><p class=\"result-lead\">Tutorin sedang membaca seluruh 12 jawaban dan hubungan antarjawabannya untuk menyusun rekomendasi yang lebih personal.</p></section>';
+          window.dispatchEvent(new Event('tutorin:assessment-complete'));
+          }"""
+                  text = text[:start] + replacement + text[end:]
+                  p.write_text(text, encoding='utf-8')
 
-              if updated != text:
-                  p.write_text(updated, encoding='utf-8')
+          # Make the AI client react to the explicit completion event instead of relying only on DOM timing.
+          p = Path('assessment-ai.js')
+          if p.exists():
+              text = p.read_text(encoding='utf-8')
+              marker = "  window.TutorinAssessmentAI={runAI,ENDPOINT};"
+              hook = "  window.addEventListener('tutorin:assessment-complete', () => requestForPage(true));"
+              if hook not in text and marker in text:
+                  text = text.replace(marker, hook + '\n' + marker, 1)
+                  p.write_text(text, encoding='utf-8')
           PY
-      - name: Commit injected pages
+      - name: Commit AI-first assessment changes
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assessment-need.html assessment-method.html
+          git add assessment-need.html assessment-method.html assessment-ai.js
           if git diff --cached --quiet; then
             echo 'No changes needed.'
           else
-            git commit -m 'Cache bust assessment AI client'
+            git commit -m 'Make method assessment AI-first'
             git push
           fi
