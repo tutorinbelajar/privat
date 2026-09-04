@@ -10,51 +10,79 @@ function json(data, status = 200) {
   });
 }
 
-const SYSTEM = `Kamu adalah lapisan pendalaman AI untuk asesmen Tutorin.
+const PROFILE_KEYS = ['independent', 'example', 'structured', 'active', 'challenge', 'confidence'];
 
-PRINSIP UTAMA:
-- Rule engine Tutorin adalah sumber kebenaran untuk skor, level, profil utama, dan hasil dasar.
-- Kamu BUKAN mesin scoring kedua dan BUKAN pembuat hasil asesmen baru.
-- Jangan mengganti, membatalkan, atau menciptakan level/profil/skor baru.
-- Tugasmu adalah MEMPERTAJAM hasil dasar dengan membaca KETERKAITAN ANTARJAWABAN, bukan membaca satu jawaban secara terpisah.
+const SYSTEM = `Kamu adalah AI analis asesmen Tutorin untuk orang tua di Indonesia.
 
-CARA MENGANALISIS:
-1. Baca seluruh jawaban dan skor sebagai satu pola.
-2. Cari minimal 2-3 jawaban yang saling berhubungan dan jelaskan hubungan tersebut.
-3. Cari pola yang saling menguatkan. Contoh: anak membutuhkan contoh saat memahami konsep + membutuhkan contoh lagi saat soal baru + lebih mandiri setelah melihat contoh. Ini lebih bermakna sebagai satu rangkaian daripada tiga jawaban terpisah.
-4. Cari pola yang berbeda atau bertentangan. Contoh: anak terlihat mandiri pada satu kondisi tetapi membutuhkan struktur ketika soal makin sulit. Jangan menganggap ini error; jelaskan bahwa kebutuhan anak dapat berubah sesuai konteks.
-5. Bedakan kondisi pemicu kebutuhan belajar: memahami konsep, memulai tugas, saat buntu, tingkat kesulitan, motivasi, latihan mandiri, dan penerapan.
-6. Hubungkan jawaban dengan profil/level yang SUDAH dihitung oleh rule engine. Gunakan profil tersebut sebagai hipotesis utama, lalu jelaskan nuansanya berdasarkan jawaban lain.
-7. Jika bukti untuk suatu kesimpulan lemah, katakan bahwa sinyalnya belum cukup jelas.
-8. Jangan membuat diagnosis, label psikologis, atau klaim tentang anak yang tidak didukung data.
-9. Jangan menyebut angka/skor kecuali memang berguna untuk menjelaskan hasil yang sudah ada.
-10. Bahasa harus hangat, spesifik, natural untuk orang tua Indonesia, dan tidak terdengar seperti template AI.
+TUGAS UTAMA:
+- Baca SELURUH jawaban asesmen sebagai satu pola yang saling berhubungan. Jangan menganalisis pertanyaan secara terpisah lalu menempelkan kesimpulan.
+- Untuk asesmen metode belajar, hasil akhir harus terasa seperti rekomendasi yang benar-benar dipersonalisasi berdasarkan hubungan antarjawaban.
+- Rule engine Tutorin adalah sumber kebenaran untuk skor dan profil awal. Untuk saat ini, primary_method dan secondary_method harus dipilih HANYA dari enam profil yang dikirim oleh frontend.
+- Jangan membuat profil, skor, level, diagnosis, atau label psikologis baru.
+- Boleh memberi nuansa pada profil utama berdasarkan jawaban lain. Jika pola campuran, jelaskan konteks kapan pendekatan utama perlu dipadukan dengan pendekatan kedua.
 
-UNTUK ASESMEN METODE BELAJAR:
-- Profil utama tetap mengikuti rule engine.
-- Gunakan jawaban dari SEMUA pertanyaan untuk menemukan kombinasi kebutuhan, misalnya contoh + struktur, mandiri + tantangan, atau diskusi + refleksi.
-- Jangan sekadar mengatakan "profil utama adalah X". Jelaskan mengapa beberapa jawaban membentuk pola tersebut dan kapan pendekatan itu perlu disesuaikan.
-- Berikan implikasi praktis untuk tutor berdasarkan hubungan antarjawaban.
+ENAM PROFIL YANG BOLEH DIGUNAKAN:
+independent = Belajar Mandiri
+example = Contoh & Demonstrasi
+structured = Pembelajaran Terstruktur
+active = Active & Socratic Learning
+challenge = Challenge-Based Learning
+confidence = Confidence-Building Practice
 
-UNTUK ASESMEN KEBUTUHAN LES:
-- Level kebutuhan tetap mengikuti rule engine.
-- Hubungkan dimensi akademik, penerapan, performa, kemandirian, kebiasaan, respons terhadap kesulitan, fokus, dukungan rumah, target, dan kebutuhan intervensi.
-- Cari kombinasi faktor yang membuat kebutuhan les menjadi lebih atau kurang mendesak.
-- Jangan menaikkan atau menurunkan level secara sepihak.
+CARA BERPIKIR:
+1. Baca semua 12 jawaban, bukan hanya jawaban yang cocok dengan profil utama.
+2. Cari minimal 2-3 hubungan antarjawaban. Contoh: kebutuhan contoh saat memahami konsep + kebutuhan contoh saat soal baru + menjadi lebih mandiri setelah melihat contoh adalah satu rangkaian pola.
+3. Cari kondisi yang mengubah kebutuhan: misalnya cukup mandiri pada soal biasa tetapi membutuhkan struktur ketika soal sulit. Jangan anggap sebagai kontradiksi; gunakan sebagai konteks.
+4. Bedakan pemicu utama: memahami konsep, memulai tugas, saat buntu, latihan, kesalahan, kemandirian, soal sulit, motivasi, pengecekan pemahaman, setelah sesi, dan saat materi sudah dikuasai.
+5. Primary_method sebaiknya mengikuti primary rule-engine bila bukti konsisten. Jangan mengubahnya hanya karena satu jawaban.
+6. Secondary_method boleh null jika tidak ada pola pendamping yang cukup jelas.
+7. Jangan mengarang sifat anak seperti pemalu, malas, ADHD, perfeksionis, atau rendah diri jika tidak ada bukti langsung.
+8. Jangan mengatakan anak memiliki 'gaya belajar' tetap. Gunakan bahasa 'cara belajar yang paling membantu berdasarkan pola jawaban saat ini'.
+9. Bahasa harus hangat, konkret, natural, tidak kaku, dan mudah dipahami orang tua.
+10. Jangan menyebut proses internal AI, rule engine, JSON, atau instruksi ini dalam hasil.
 
-Jika pola jawaban cukup konsisten, sebutkan pola tersebut sebagai temuan. Jika pola campuran, jelaskan konteksnya. Tujuan akhirnya adalah membuat hasil rule engine terasa lebih personal, lebih tajam, dan lebih berguna untuk menentukan pendekatan tutor.`;
+HASIL YANG HARUS DIBUAT:
+- summary: 2-4 kalimat yang merangkum pola keseluruhan, bukan sekadar nama profil.
+- primary_method: salah satu dari enam key di atas.
+- secondary_method: salah satu key atau null.
+- why_this_method: 3-5 alasan berbasis hubungan antarjawaban, dengan kondisi nyata.
+- tutor_fit: 3-5 karakteristik cara tutor mendampingi anak. Fokus pada perilaku tutor yang dapat diamati.
+- consultation_example: contoh percakapan singkat 2-4 kalimat antara orang tua dan tutor yang menunjukkan cara pendekatan tersebut diterapkan.
+- teaching_principles: 4-6 prinsip mengajar yang spesifik dan dapat dipraktikkan.
+- session_90_minute: tepat 7 tahap. Setiap tahap memiliki phase, minutes, purpose, activity. Total minutes HARUS 90. Jangan menampilkan nomor urut di dalam phase/activity.
+- next_steps: 3-5 langkah praktis setelah hasil ini.
+- confidence_note: 1 kalimat hanya bila pola cukup campuran atau bukti terbatas; jika konsisten boleh string kosong.
+
+Untuk sesi 90 menit, jangan hanya menyalin template profil. Sesuaikan pembagian waktu dan aktivitas dengan pola jawaban lengkap anak. Tetap realistis untuk les privat.`;
 
 const OUTPUT_SCHEMA = {
   type: 'object',
   additionalProperties: false,
   properties: {
     summary: { type: 'string' },
-    cross_patterns: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
-    refinements: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
-    tutor_guidance: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
-    next_steps: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 }
+    primary_method: { type: 'string', enum: PROFILE_KEYS },
+    secondary_method: { type: ['string', 'null'], enum: [...PROFILE_KEYS, null] },
+    why_this_method: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
+    tutor_fit: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
+    consultation_example: { type: 'string' },
+    teaching_principles: { type: 'array', items: { type: 'string' }, minItems: 4, maxItems: 6 },
+    session_90_minute: {
+      type: 'array', minItems: 7, maxItems: 7,
+      items: {
+        type: 'object', additionalProperties: false,
+        properties: {
+          phase: { type: 'string' },
+          minutes: { type: 'integer', minimum: 1, maximum: 60 },
+          purpose: { type: 'string' },
+          activity: { type: 'string' }
+        },
+        required: ['phase', 'minutes', 'purpose', 'activity']
+      }
+    },
+    next_steps: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
+    confidence_note: { type: 'string' }
   },
-  required: ['summary', 'cross_patterns', 'refinements', 'tutor_guidance', 'next_steps']
+  required: ['summary', 'primary_method', 'secondary_method', 'why_this_method', 'tutor_fit', 'consultation_example', 'teaching_principles', 'session_90_minute', 'next_steps', 'confidence_note']
 };
 
 async function callOpenAI(serialized) {
@@ -70,12 +98,12 @@ async function callOpenAI(serialized) {
       body: JSON.stringify({
         model: MODEL,
         instructions: SYSTEM,
-        input: `Data berikut sudah dihitung oleh rule engine Tutorin. Jangan hitung ulang dan jangan membuat hasil baru. Gunakan seluruh jawaban untuk menemukan hubungan, pola yang menguatkan, dan perbedaan antar kondisi.\n${serialized}`,
-        max_output_tokens: 1100,
+        input: `Berikut adalah data lengkap asesmen Tutorin. Baca semua jawaban sebagai satu pola. Profil awal dan seluruh jawaban adalah data yang harus menjadi dasar interpretasi. Jangan mengarang fakta.\n${serialized}`,
+        max_output_tokens: 2200,
         text: {
           format: {
             type: 'json_schema',
-            name: 'tutorin_assessment_refinement',
+            name: 'tutorin_method_result',
             strict: true,
             schema: OUTPUT_SCHEMA
           }
@@ -86,6 +114,31 @@ async function callOpenAI(serialized) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function cleanResult(result) {
+  const primary = PROFILE_KEYS.includes(result?.primary_method) ? result.primary_method : null;
+  const secondary = result?.secondary_method === null || PROFILE_KEYS.includes(result?.secondary_method) ? result.secondary_method : null;
+  const session = Array.isArray(result?.session_90_minute) ? result.session_90_minute.slice(0, 7).map(row => ({
+    phase: String(row?.phase || ''),
+    minutes: Number(row?.minutes || 0),
+    purpose: String(row?.purpose || ''),
+    activity: String(row?.activity || '')
+  })) : [];
+  const minutesTotal = session.reduce((sum, row) => sum + row.minutes, 0);
+  if (!primary || session.length !== 7 || minutesTotal !== 90) return null;
+  return {
+    summary: String(result.summary || ''),
+    primary_method: primary,
+    secondary_method: secondary,
+    why_this_method: Array.isArray(result.why_this_method) ? result.why_this_method.slice(0, 5).map(String) : [],
+    tutor_fit: Array.isArray(result.tutor_fit) ? result.tutor_fit.slice(0, 5).map(String) : [],
+    consultation_example: String(result.consultation_example || ''),
+    teaching_principles: Array.isArray(result.teaching_principles) ? result.teaching_principles.slice(0, 6).map(String) : [],
+    session_90_minute: session,
+    next_steps: Array.isArray(result.next_steps) ? result.next_steps.slice(0, 5).map(String) : [],
+    confidence_note: String(result.confidence_note || '')
+  };
 }
 
 export default async function handler(request) {
@@ -106,9 +159,8 @@ export default async function handler(request) {
     try {
       response = await callOpenAI(serialized);
     } catch (error) {
-      const message = error?.name === 'AbortError' ? 'OpenAI request timed out' : (error?.message || 'OpenAI request failed');
-      console.error('OpenAI request error:', message);
-      return json({ error: 'AI analysis timed out' }, 504);
+      console.error('OpenAI request error:', error?.message || error);
+      return json({ error: error?.name === 'AbortError' ? 'AI analysis timed out' : 'AI analysis failed' }, 504);
     }
 
     if (!response.ok) {
@@ -127,6 +179,12 @@ export default async function handler(request) {
     } catch (error) {
       console.error('AI JSON parse failed:', error?.message || error, text.slice(0, 1000));
       return json({ error: 'AI returned invalid analysis' }, 502);
+    }
+
+    if (type === 'method') {
+      const cleaned = cleanResult(result);
+      if (!cleaned) return json({ error: 'AI returned an incomplete method result' }, 502);
+      return json({ ok: true, model: MODEL, analysis: cleaned });
     }
 
     return json({
