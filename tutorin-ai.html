@@ -4,24 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#005b38">
-<meta name="description" content="Tutorín AI membantu siswa belajar mandiri, memahami PR, dan memecahkan soal dengan langkah yang jelas.">
+<meta name="description" content="Tutorín AI membantu siswa belajar mandiri, memahami PR, membaca foto soal, dan belajar sesuai kebutuhan.">
 <title>Tutorín AI — Teman Belajar Mandiri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20260904">
-<link rel="stylesheet" href="tutorin-ai.css?v=20260904">
+<link rel="stylesheet" href="tutorin-ai.css?v=20260904-2">
 </head>
 <body class="ai-page">
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="index.html"><span class="brand-mark">T</span><span>Tutorin</span></a>
     <nav aria-label="Navigasi utama">
-      <a href="index.html#program">Program</a>
-      <a href="index.html#how-it-works">Metode Kami</a>
-      <a href="assessment.html">Asesmen</a>
-      <a class="ai-nav-active" href="tutorin-ai.html">Tutorín AI</a>
-      <a class="nav-cta" href="https://wa.me/6283155365009?text=Halo%20Tutorin,%20saya%20ingin%20konsultasi%20tentang%20kebutuhan%20belajar%20anak." target="_blank" rel="noreferrer">Konsultasi</a>
+      <a href="index.html#program">Program</a><a href="index.html#how-it-works">Metode Kami</a><a href="assessment.html">Asesmen</a><a class="ai-nav-active" href="tutorin-ai.html">Tutorín AI</a><a class="nav-cta" href="https://wa.me/6283155365009?text=Halo%20Tutorin,%20saya%20ingin%20konsultasi%20tentang%20kebutuhan%20belajar%20anak." target="_blank" rel="noreferrer">Konsultasi</a>
     </nav>
   </div>
 </header>
@@ -31,36 +27,38 @@
     <div class="ai-icon">✦</div>
     <span class="section-kicker">TUTORIN AI</span>
     <h1>Teman belajar mandiri.</h1>
-    <p>Bantu memahami soal, bukan sekadar memberi jawaban. Tanyakan PR atau materi yang sedang kamu pelajari.</p>
+    <p>Bukan sekadar memberi jawaban. Tutorín AI membaca soal, melihat cara berpikirmu, dan menyesuaikan cara membimbing.</p>
+    <div class="ai-capabilities"><span>✓ PR & soal</span><span>✓ Foto soal</span><span>✓ Belajar konsep</span><span>✓ Latihan</span><span>✓ Adaptif</span></div>
   </section>
 
   <section class="ai-chat" aria-label="Percakapan Tutorín AI">
     <div class="chat-messages" id="messages" aria-live="polite">
       <div class="welcome-card" id="welcomeCard">
         <strong>Halo! Aku Tutorín AI 👋</strong>
-        <p>Ceritakan soal atau materi yang sedang kamu pelajari. Kita bahas pelan-pelan.</p>
+        <p>Ceritakan soal atau materi yang sedang kamu pelajari. Kalau soalnya ada di kertas/buku, kamu juga bisa kirim fotonya.</p>
         <div class="quick-actions">
-          <button type="button" data-prompt="Bantu aku memahami soal Matematika ini. Aku bingung mulai dari mana.">Bantu PR-ku</button>
-          <button type="button" data-prompt="Buatkan 5 latihan soal sesuai kelas dan kemampuan saya. Tanyakan kelas dan materi jika belum jelas.">Buat latihan</button>
-          <button type="button" data-prompt="Aku mau tahu materi apa yang masih lemah dari latihan yang sudah aku kerjakan.">Cek kemampuan</button>
-          <button type="button" data-prompt="Temani aku belajar satu materi sampai aku benar-benar paham.">Temani belajar</button>
+          <button type="button" data-prompt="Aku punya PR dan bingung mulai dari mana. Tolong bantu aku memahami soalnya tanpa langsung memberi jawaban.">Bantu PR-ku</button>
+          <button type="button" data-prompt="Buatkan 5 latihan soal untukku. Tentukan dulu tingkat dan materi yang cocok dari konteks belajarku jika tersedia.">Buat latihan</button>
+          <button type="button" data-prompt="Dari cara belajarku dan hasil asesmen yang tersedia, apa yang sebaiknya aku perbaiki?">Cek kemampuan</button>
+          <button type="button" data-prompt="Temani aku belajar satu materi sampai aku benar-benar paham. Mulai dengan mengecek apa yang sudah aku pahami.">Temani belajar</button>
         </div>
       </div>
     </div>
 
     <form class="chat-composer" id="chatForm">
-      <textarea id="promptInput" rows="1" maxlength="6000" placeholder="Tanyakan apa saja tentang pelajaranmu..." aria-label="Pesan untuk Tutorín AI"></textarea>
+      <div class="attachment-preview" id="attachmentPreview" aria-live="polite"></div>
+      <textarea id="promptInput" rows="1" maxlength="6000" placeholder="Tanyakan soal atau materi yang sedang kamu pelajari..." aria-label="Pesan untuk Tutorín AI"></textarea>
       <div class="composer-bottom">
-        <span class="composer-hint">Tutorín AI membimbing langkah demi langkah.</span>
+        <div class="composer-tools"><label class="attach-btn" title="Kirim foto soal"><input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>📷 <span>Foto soal</span></label><span class="composer-hint">Bisa kirim soal + cara kerjamu</span></div>
         <button class="send-btn" id="sendButton" type="submit" aria-label="Kirim pesan">↑</button>
       </div>
     </form>
   </section>
 
-  <p class="ai-note">Tutorín AI adalah pendamping belajar. Untuk kebutuhan belajar yang lebih personal dan intensif, kamu bisa berkonsultasi dengan tutor Tutorin.</p>
+  <p class="ai-note">Tutorín AI adalah pendamping belajar mandiri. Untuk pendampingan yang lebih intensif, kamu bisa berkonsultasi dengan tutor Tutorin.</p>
 </main>
 
 <footer class="site-footer"><div class="footer-inner"><div><a class="brand footer-brand" href="index.html"><span class="brand-mark">T</span>Tutorin</a><p>Privat • Personal • Terarah</p></div><div class="footer-nav"><a href="index.html#program">Program</a><a href="assessment.html">Asesmen</a><a href="tutorin-ai.html">Tutorín AI</a><a href="https://wa.me/6283155365009" target="_blank" rel="noreferrer">Konsultasi</a></div></div></footer>
-<script src="tutorin-ai.js?v=20260904"></script>
+<script src="tutorin-ai.js?v=20260904-2"></script>
 </body>
 </html>
