@@ -14,21 +14,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Inject AI client
+      - name: Inject AI client with cache busting
         run: |
           python - <<'PY'
           from pathlib import Path
-          tag = '<script src="assessment-ai.js"></script>'
+          import re
+
+          tag = '<script src="assessment-ai.js?v=20260904-2"></script>'
+          pattern = r'<script\s+src=["\']assessment-ai\.js(?:\?[^"\']*)?["\']\s*></script>'
+
           for name in ('assessment-need.html', 'assessment-method.html'):
               p = Path(name)
               if not p.exists():
                   continue
+
               text = p.read_text(encoding='utf-8')
-              if tag not in text:
+              updated = re.sub(pattern, tag, text)
+
+              if tag not in updated:
                   marker = '</body>'
-                  if marker not in text:
+                  if marker not in updated:
                       raise SystemExit(f'Missing {marker} in {name}')
-                  p.write_text(text.replace(marker, tag + marker), encoding='utf-8')
+                  updated = updated.replace(marker, tag + marker, 1)
+
+              if updated != text:
+                  p.write_text(updated, encoding='utf-8')
           PY
       - name: Commit injected pages
         run: |
@@ -38,6 +48,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'No changes needed.'
           else
-            git commit -m 'Inject assessment AI client into assessment pages'
+            git commit -m 'Cache bust assessment AI client'
             git push
           fi
