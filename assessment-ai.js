@@ -45,33 +45,12 @@
     return {answers,scores,primary:primary?{key:primary,name:profiles[primary]?.name}:null,secondary:secondary?{key:secondary,name:profiles[secondary]?.name}:null,patternContext:{profileDescriptions:Object.fromEntries(Object.keys(profiles).map(k=>[k,{name:profiles[k].name,desc:profiles[k].desc,role:profiles[k].role}]))}};
   };
 
-  const hideStaticMethodResult = (result) => {
-    if (!methodPage() || !result) return;
-    result.querySelector('.result-score')?.remove();
-    [...result.children].forEach(el => { if (el.id !== 'ai-method-result' && !el.classList.contains('ai-loading-host')) el.dataset.aiStatic='1'; });
-  };
-
   const renderMethodResult = (analysis) => {
     const result=document.getElementById('result'); if(!result||!analysis) return;
-    result.innerHTML=`<section id="ai-method-result" class="panel">
-      <span class="k">HASIL PEMETAAN CARA BELAJAR</span>
-      <h1>Cara belajar yang paling cocok: ${escapeHtml(analysis.primary_method_name || analysis.primary_method || '')}</h1>
-      <p class="result-lead">${escapeHtml(analysis.summary)}</p>
-      ${analysis.secondary_method_name ? `<p><strong>Pendekatan pendamping:</strong> ${escapeHtml(analysis.secondary_method_name)}</p>` : ''}
-      ${analysis.confidence_note ? `<p class="disclaimer">${escapeHtml(analysis.confidence_note)}</p>` : ''}
-      <div class="panel"><h3>Mengapa pendekatan ini paling cocok?</h3>${listHtml(analysis.why_this_method)}</div>
-      <div class="panel"><h3>Tutor yang cocok</h3>${listHtml(analysis.tutor_fit)}</div>
-      <div class="parent-script"><strong>Contoh saat berkonsultasi dengan tutor</strong><p>${escapeHtml(analysis.consultation_example)}</p></div>
-      <div class="panel"><h3>Prinsip mengajar</h3>${listHtml(analysis.teaching_principles)}</div>
-      <div class="panel"><h3>Contoh sesi privat 90 menit</h3><div class="session-ai">${(analysis.session_90_minute||[]).map(row=>`<div class="session-ai-row"><strong>${escapeHtml(row.phase)}</strong><div class="mins">${escapeHtml(row.minutes)} menit</div><p><strong>Tujuan:</strong> ${escapeHtml(row.purpose)}</p><p><strong>Aktivitas:</strong> ${escapeHtml(row.activity)}</p></div>`).join('')}</div></div>
-      <div class="panel"><h3>Langkah berikutnya</h3>${listHtml(analysis.next_steps)}</div>
-    </section>`;
+    result.innerHTML=`<section id="ai-method-result" class="panel"><span class="k">HASIL PEMETAAN CARA BELAJAR</span><h1>Cara belajar yang paling cocok: ${escapeHtml(analysis.primary_method_name || analysis.primary_method || '')}</h1><p class="result-lead">${escapeHtml(analysis.summary)}</p>${analysis.secondary_method_name ? `<p><strong>Pendekatan pendamping:</strong> ${escapeHtml(analysis.secondary_method_name)}</p>` : ''}${analysis.confidence_note ? `<p class="disclaimer">${escapeHtml(analysis.confidence_note)}</p>` : ''}<div class="panel"><h3>Mengapa pendekatan ini paling cocok?</h3>${listHtml(analysis.why_this_method)}</div><div class="panel"><h3>Tutor yang cocok</h3>${listHtml(analysis.tutor_fit)}</div><div class="parent-script"><strong>Contoh saat berkonsultasi dengan tutor</strong><p>${escapeHtml(analysis.consultation_example)}</p></div><div class="panel"><h3>Prinsip mengajar</h3>${listHtml(analysis.teaching_principles)}</div><div class="panel"><h3>Contoh sesi privat 90 menit</h3><div class="session-ai">${(analysis.session_90_minute||[]).map(row=>`<div class="session-ai-row"><strong>${escapeHtml(row.phase)}</strong><div class="mins">${escapeHtml(row.minutes)} menit</div><p><strong>Tujuan:</strong> ${escapeHtml(row.purpose)}</p><p><strong>Aktivitas:</strong> ${escapeHtml(row.activity)}</p></div>`).join('')}</div></div><div class="panel"><h3>Langkah berikutnya</h3>${listHtml(analysis.next_steps)}</div></section>`;
   };
 
-  const normalizeMethod = (ai, payload) => {
-    const names={}; Object.keys(profiles).forEach(k=>names[k]=profiles[k].name);
-    return {...ai,primary_method_name:names[ai.primary_method]||payload.primary?.name||'',secondary_method_name:ai.secondary_method?names[ai.secondary_method]:'',};
-  };
+  const normalizeMethod = (ai, payload) => { const names={}; Object.keys(profiles).forEach(k=>names[k]=profiles[k].name); return {...ai,primary_method_name:names[ai.primary_method]||payload.primary?.name||'',secondary_method_name:ai.secondary_method?names[ai.secondary_method]:''}; };
 
   const renderNeedAI = (analysis) => {
     const result=document.getElementById('result'); if(!result||result.dataset.aiRendered==='1') return;
@@ -84,15 +63,11 @@
     const result=document.getElementById('result'); if(!result||result.classList.contains('hide')||(!force&&result.dataset.aiRequested==='1')) return;
     const path=location.pathname.split('/').pop(); const type=path==='assessment-need.html'?'need':path==='assessment-method.html'?'method':null; if(!type)return;
     result.dataset.aiRequested='1'; addStyles();
-    if(methodPage()) { hideStaticMethodResult(result); result.innerHTML='<section class="panel ai-loading-host"><span class="ai-badge">HASIL PEMETAAN CARA BELAJAR</span><p class="ai-loading">Sedang membaca 12 jawaban dan keterkaitannya untuk menyusun rekomendasi yang lebih personal…</p></section>'; }
+    if(methodPage()) result.innerHTML='<section class="panel ai-loading-host"><span class="ai-badge">HASIL PEMETAAN CARA BELAJAR</span><p class="ai-loading">Sedang membaca 12 jawaban dan keterkaitannya untuk menyusun rekomendasi yang lebih personal…</p></section>';
     else { const loading=document.createElement('section'); loading.className='ai-panel'; loading.innerHTML='<span class="ai-badge">PENDALAMAN AI TUTORIN</span><p class="ai-loading">Sedang membaca keterkaitan antarjawaban, bukan hanya satu pola…</p>'; result.appendChild(loading); }
     const payload=type==='need'?getNeedAnalysis():getMethodAnalysis(); if(!payload)return;
     try { const ai=await runAI(type,payload); if(methodPage()) renderMethodResult(normalizeMethod(ai,payload)); else { result.querySelector('.ai-panel')?.remove(); renderNeedAI(ai); } }
-    catch(error) {
-      console.warn('Tutorin AI analysis unavailable:',error?.message||error);
-      if(methodPage()) { result.innerHTML=''; const fallback=document.createElement('div'); fallback.className='ai-panel'; fallback.innerHTML='<span class="ai-badge">HASIL ASESMEN</span><p class="ai-error">Hasil personalisasi AI belum tersedia. Silakan coba kembali beberapa saat lagi.</p>'; result.appendChild(fallback); }
-      else { const loading=result.querySelector('.ai-panel'); if(loading) loading.innerHTML='<span class="ai-badge">PENDALAMAN AI TUTORIN</span><p class="ai-error">Pendalaman AI sedang tidak tersedia. Hasil asesmen utama tetap dapat digunakan.</p>'; }
-    }
+    catch(error) { console.warn('Tutorin AI analysis unavailable:',error?.message||error); if(methodPage()) result.innerHTML='<section class="ai-panel"><span class="ai-badge">HASIL ASESMEN</span><p class="ai-error">Hasil personalisasi AI belum tersedia. Silakan coba kembali beberapa saat lagi.</p></section>'; else { const loading=result.querySelector('.ai-panel'); if(loading) loading.innerHTML='<span class="ai-badge">PENDALAMAN AI TUTORIN</span><p class="ai-error">Pendalaman AI sedang tidak tersedia. Hasil asesmen utama tetap dapat digunakan.</p>'; } }
   };
 
   const observe=()=>{const result=document.getElementById('result');if(!result)return;const observer=new MutationObserver(()=>{if(!methodPage())requestForPage();});observer.observe(result,{childList:true,subtree:false,attributes:true,attributeFilter:['class']});requestForPage();};
