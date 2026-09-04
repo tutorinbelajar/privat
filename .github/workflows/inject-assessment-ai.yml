@@ -1,6 +1,8 @@
 name: Inject Tutorin Assessment AI
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -8,29 +10,46 @@ permissions:
 
 jobs:
   inject:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Verify assessment AI wiring
+      - name: Wire assessment result actions
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
-          for name in ('assessment-need.html', 'assessment-method.html'):
-              p = Path(name)
-              if not p.exists():
-                  continue
-              text = p.read_text(encoding='utf-8')
-              if not re.search(r'<script\\s+src=["\\']assessment-ai\\.js(?:\\?[^"\\']*)?["\\']\\s*></script>', text):
-                  raise SystemExit(f'Missing assessment-ai.js tag in {name}')
+
           p = Path('assessment-method.html')
+          if not p.exists():
+              raise SystemExit('assessment-method.html not found')
           text = p.read_text(encoding='utf-8')
-          if 'tutorin:assessment-complete' not in text:
-              raise SystemExit('Missing assessment completion event in assessment-method.html')
-          p = Path('assessment-ai.js')
-          text = p.read_text(encoding='utf-8')
-          if "tutorin:assessment-complete" not in text or "fetch(ENDPOINT" not in text:
-              raise SystemExit('Assessment AI client is not wired correctly')
-          print('Assessment AI wiring OK')
+          tag = '<script src="assessment-result-actions.js?v=20260904-1"></script>'
+          if 'assessment-result-actions.js' not in text:
+              text = text.replace('</body>', tag + '</body>')
+              p.write_text(text, encoding='utf-8')
+              print('Added assessment-result-actions.js')
+          else:
+              print('assessment-result-actions.js already wired')
+          
+          ai = Path('assessment-ai.js').read_text(encoding='utf-8')
+          if 'tutorin:assessment-complete' not in ai or 'fetch(ENDPOINT' not in ai:
+              raise SystemExit('Assessment AI client wiring check failed')
+          
+          method = p.read_text(encoding='utf-8')
+          if 'assessment-result-actions.js' not in method:
+              raise SystemExit('Result actions script was not wired')
+          print('Assessment result actions wiring OK')
           PY
+      - name: Commit wiring if changed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet; then
+            echo 'No changes to commit'
+          else
+            git add assessment-method.html
+            git commit -m 'Wire assessment result actions [skip ci]'
+            git push
+          fi
