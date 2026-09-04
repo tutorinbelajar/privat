@@ -35,6 +35,13 @@
     document.head.appendChild(style);
   };
 
+  const isMethodPage = () => location.pathname.split('/').pop() === 'assessment-method.html';
+
+  const removeMethodIndicator = (result) => {
+    if (!isMethodPage() || !result) return;
+    result.querySelector('.result-score')?.remove();
+  };
+
   const getNeedAnalysis = () => {
     if (!Array.isArray(window.a) && typeof a === 'undefined') return null;
     const answers = a.map((v, index) => ({ question: qs[index]?.[0], answer: qs[index]?.[2]?.[Number(v)] ?? null, value: Number(v) }));
@@ -97,6 +104,7 @@
     const path = location.pathname.split('/').pop();
     const type = path === 'assessment-need.html' ? 'need' : path === 'assessment-method.html' ? 'method' : null;
     if (!type) return;
+    removeMethodIndicator(result);
     const payload = type === 'need' ? getNeedAnalysis() : getMethodAnalysis();
     if (!payload) return;
     result.dataset.aiRequested = '1';
@@ -108,6 +116,7 @@
     try {
       const ai = await runAI(type, payload);
       loading.remove();
+      removeMethodIndicator(result);
       if (ai) renderAI(ai);
       else throw new Error('AI returned no analysis');
     } catch (error) {
@@ -123,7 +132,10 @@
   const observe = () => {
     const result = document.getElementById('result');
     if (!result) return;
-    const observer = new MutationObserver(() => requestForPage());
+    const observer = new MutationObserver(() => {
+      removeMethodIndicator(result);
+      requestForPage();
+    });
     observer.observe(result, { childList: true, subtree: false, attributes: true, attributeFilter: ['class'] });
     requestForPage();
   };
