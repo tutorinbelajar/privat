@@ -1,5 +1,6 @@
 (() => {
   const ENDPOINT = '/api/assessment';
+  const TIMEOUT_MS = 30000;
 
   const escapeHtml = (value) => String(value ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -9,18 +10,20 @@
     ? `<ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '';
 
   const runAI = async (assessmentType, analysis) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
       const response = await fetch(ENDPOINT, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ assessmentType, analysis })
+        body: JSON.stringify({ assessmentType, analysis }),
+        signal: controller.signal
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data?.ok || !data?.analysis) throw new Error(data?.error || 'AI analysis failed');
+      if (!response.ok || !data?.ok || !data?.analysis) throw new Error(data?.error || `HTTP ${response.status}`);
       return data.analysis;
-    } catch (error) {
-      console.warn('Tutorin AI analysis unavailable:', error?.message || error);
-      return null;
+    } finally {
+      clearTimeout(timer);
     }
   };
 
@@ -28,7 +31,7 @@
     if (document.getElementById('tutorin-ai-style')) return;
     const style = document.createElement('style');
     style.id = 'tutorin-ai-style';
-    style.textContent = `.ai-panel{margin-top:18px;padding:20px;border:1px solid var(--line,#dce9e2);border-radius:18px;background:linear-gradient(180deg,#fbfefc,#f4faf7)}.ai-badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:#e5f4ec;color:var(--green-2,#005b38);font-size:11px;font-weight:800;letter-spacing:.04em}.ai-panel h2{margin:10px 0 8px;font-size:20px}.ai-panel h3{margin:18px 0 7px;font-size:14px}.ai-panel p{line-height:1.7;margin:0}.ai-panel ul{margin:7px 0 0;padding-left:20px}.ai-panel li{margin:6px 0;line-height:1.6}.ai-loading{color:#5d6f67;font-size:13px;margin-top:10px}`;
+    style.textContent = `.ai-panel{margin-top:18px;padding:20px;border:1px solid var(--line,#dce9e2);border-radius:18px;background:linear-gradient(180deg,#fbfefc,#f4faf7)}.ai-badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:#e5f4ec;color:var(--green-2,#005b38);font-size:11px;font-weight:800;letter-spacing:.04em}.ai-panel h2{margin:10px 0 8px;font-size:20px}.ai-panel h3{margin:18px 0 7px;font-size:14px}.ai-panel p{line-height:1.7;margin:0}.ai-panel ul{margin:7px 0 0;padding-left:20px}.ai-panel li{margin:6px 0;line-height:1.6}.ai-loading{color:#5d6f67;font-size:13px;margin-top:10px}.ai-error{color:#66756f;font-size:13px;margin-top:10px}.ai-retry{display:inline-block;margin-top:12px;padding:9px 14px;border:0;border-radius:10px;background:#006b45;color:#fff;font-weight:700;cursor:pointer}`;
     document.head.appendChild(style);
   };
 
@@ -66,9 +69,14 @@
     result.appendChild(panel);
   };
 
-  const requestForPage = async () => {
+  const showError = (loading, message, retry) => {
+    loading.innerHTML = `<span class="ai-badge">ANALISIS AI TUTORIN</span><p class="ai-error">${escapeHtml(message)}</p><button type="button" class="ai-retry">Coba lagi</button>`;
+    loading.querySelector('.ai-retry').addEventListener('click', retry, { once: true });
+  };
+
+  const requestForPage = async (force = false) => {
     const result = document.getElementById('result');
-    if (!result || result.classList.contains('hide') || result.dataset.aiRequested === '1') return;
+    if (!result || result.classList.contains('hide') || (!force && result.dataset.aiRequested === '1')) return;
     const path = location.pathname.split('/').pop();
     const type = path === 'assessment-need.html' ? 'need' : path === 'assessment-method.html' ? 'method' : null;
     if (!type) return;
@@ -80,9 +88,19 @@
     loading.className = 'ai-panel';
     loading.innerHTML = `<span class="ai-badge">ANALISIS AI TUTORIN</span><p class="ai-loading">Sedang menyesuaikan interpretasi dengan pola jawaban anak…</p>`;
     result.appendChild(loading);
-    const ai = await runAI(type, payload);
-    loading.remove();
-    if (ai) renderAI(ai);
+    try {
+      const ai = await runAI(type, payload);
+      loading.remove();
+      if (ai) renderAI(ai);
+      else throw new Error('AI returned no analysis');
+    } catch (error) {
+      console.warn('Tutorin AI analysis unavailable:', error?.message || error);
+      showError(loading, 'Analisis personal sedang tidak tersedia. Hasil asesmen utama Anda tetap dapat digunakan.', () => {
+        loading.remove();
+        result.dataset.aiRequested = '0';
+        requestForPage(true);
+      });
+    }
   };
 
   const observe = () => {
