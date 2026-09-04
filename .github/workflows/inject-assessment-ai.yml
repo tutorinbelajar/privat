@@ -38,6 +38,28 @@ jobs:
               raise SystemExit('assessment-persistence.js not found')
           print('Assessment persistence wiring OK')
           PY
+      - name: Simplify homepage final CTA
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          if not p.exists():
+              raise SystemExit('index.html not found')
+          text = p.read_text(encoding='utf-8')
+          pattern = r'(<h[1-6][^>]*>\s*Belum yakin harus mulai dari mana\?\s*</h[1-6]>.*?)(<div[^>]*class="[^"]*actions[^"]*"[^>]*>)(.*?)(</div>)'
+          match = re.search(pattern, text, flags=re.I | re.S)
+          if match:
+              actions = match.group(3)
+              actions = re.sub(r'<a\b[^>]*>\s*Cek kebutuhan anak\s*</a>\s*', '', actions, flags=re.I | re.S)
+              replacement = match.group(1) + match.group(2) + actions + match.group(4)
+              text = text[:match.start()] + replacement + text[match.end():]
+              p.write_text(text, encoding='utf-8')
+              print('Removed Cek kebutuhan anak from final CTA')
+          else:
+              print('Final CTA structure not found; leaving homepage unchanged')
+          PY
       - name: Commit wiring if changed
         run: |
           git config user.name 'github-actions[bot]'
@@ -45,7 +67,7 @@ jobs:
           if git diff --quiet; then
             echo 'No changes to commit'
           else
-            git add assessment-method.html assessment-need.html
-            git commit -m 'Wire assessment persistence [skip ci]'
+            git add assessment-method.html assessment-need.html index.html
+            git commit -m 'Simplify homepage final consultation CTA [skip ci]'
             git push
           fi
