@@ -1,7 +1,7 @@
 (() => {
   const ENDPOINT = '/api/assessment';
-  const TIMEOUT_MS = 30000;
-  const escapeHtml = (value) => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  const TIMEOUT_MS = 35000;
+  const escapeHtml = (value) => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#039;');
   const listHtml = (items) => Array.isArray(items) && items.length ? `<ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '';
   const methodPage = () => location.pathname.split('/').pop() === 'assessment-method.html';
 
@@ -9,7 +9,12 @@
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      const response = await fetch(ENDPOINT, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assessmentType, analysis }), signal: controller.signal });
+      const response = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ assessmentType, analysis }),
+        signal: controller.signal
+      });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data?.ok || !data?.analysis) throw new Error(data?.error || `HTTP ${response.status}`);
       return data.analysis;
@@ -20,7 +25,7 @@
     if (document.getElementById('tutorin-ai-style')) return;
     const style = document.createElement('style');
     style.id = 'tutorin-ai-style';
-    style.textContent = `.ai-panel{margin-top:18px;padding:20px;border:1px solid var(--line,#dce9e2);border-radius:18px;background:linear-gradient(180deg,#fbfefc,#f4faf7)}.ai-badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:#e5f4ec;color:var(--green-2,#005b38);font-size:11px;font-weight:800;letter-spacing:.04em}.ai-panel h2{margin:10px 0 8px;font-size:20px}.ai-panel h3{margin:18px 0 7px;font-size:14px}.ai-panel p{line-height:1.7;margin:0}.ai-panel ul{margin:7px 0 0;padding-left:20px}.ai-panel li{margin:6px 0;line-height:1.6}.ai-loading{color:#5d6f67;font-size:13px;margin-top:10px}.ai-panel .session-ai{display:grid;gap:10px;margin-top:10px}.ai-panel .session-ai-row{padding:14px;border:1px solid var(--line,#dce9e2);border-radius:14px;background:#fff}.ai-panel .session-ai-row strong{display:block;margin-bottom:4px}.ai-panel .session-ai-row .mins{font-size:11px;font-weight:800;color:var(--green-2,#005b38);margin-bottom:6px}.ai-panel .session-ai-row p{font-size:12px;margin:4px 0}.ai-error{color:#5d6f67;font-size:13px;margin-top:10px}`;
+    style.textContent = `.ai-panel{margin-top:18px;padding:20px;border:1px solid var(--line,#dce9e2);border-radius:18px;background:linear-gradient(180deg,#fbfefc,#f4faf7)}.ai-badge{display:inline-flex;padding:6px 10px;border-radius:999px;background:#e5f4ec;color:var(--green-2,#005b38);font-size:11px;font-weight:800;letter-spacing:.04em}.ai-panel h2{margin:10px 0 8px;font-size:20px}.ai-panel h3{margin:18px 0 7px;font-size:14px}.ai-panel p{line-height:1.7;margin:0}.ai-panel ul{margin:7px 0 0;padding-left:20px}.ai-panel li{margin:6px 0;line-height:1.6}.ai-loading{color:#5d6f67;font-size:13px;margin-top:10px}.ai-panel .session-ai{display:grid;gap:10px;margin-top:10px}.ai-panel .session-ai-row{padding:14px;border:1px solid var(--line,#dce9e2);border-radius:14px;background:#fff}.ai-panel .session-ai-row strong{display:block;margin-bottom:4px}.ai-panel .session-ai-row .mins{font-size:11px;font-weight:800;color:var(--green-2,#005b38);margin-bottom:6px}.ai-panel .session-ai-row p{font-size:12px;margin:4px 0}.ai-error{color:#5d6f67;font-size:13px;margin-top:10px}.ai-retry{display:inline-block;margin-top:12px;padding:9px 14px;border:0;border-radius:10px;background:#006b45;color:#fff;font-weight:700;cursor:pointer}`;
     document.head.appendChild(style);
   };
 
@@ -47,10 +52,14 @@
 
   const renderMethodResult = (analysis) => {
     const result=document.getElementById('result'); if(!result||!analysis) return;
+    result.dataset.aiRendered='1';
     result.innerHTML=`<section id="ai-method-result" class="panel"><span class="k">HASIL PEMETAAN CARA BELAJAR</span><h1>Cara belajar yang paling cocok: ${escapeHtml(analysis.primary_method_name || analysis.primary_method || '')}</h1><p class="result-lead">${escapeHtml(analysis.summary)}</p>${analysis.secondary_method_name ? `<p><strong>Pendekatan pendamping:</strong> ${escapeHtml(analysis.secondary_method_name)}</p>` : ''}${analysis.confidence_note ? `<p class="disclaimer">${escapeHtml(analysis.confidence_note)}</p>` : ''}<div class="panel"><h3>Mengapa pendekatan ini paling cocok?</h3>${listHtml(analysis.why_this_method)}</div><div class="panel"><h3>Tutor yang cocok</h3>${listHtml(analysis.tutor_fit)}</div><div class="parent-script"><strong>Contoh saat berkonsultasi dengan tutor</strong><p>${escapeHtml(analysis.consultation_example)}</p></div><div class="panel"><h3>Prinsip mengajar</h3>${listHtml(analysis.teaching_principles)}</div><div class="panel"><h3>Contoh sesi privat 90 menit</h3><div class="session-ai">${(analysis.session_90_minute||[]).map(row=>`<div class="session-ai-row"><strong>${escapeHtml(row.phase)}</strong><div class="mins">${escapeHtml(row.minutes)} menit</div><p><strong>Tujuan:</strong> ${escapeHtml(row.purpose)}</p><p><strong>Aktivitas:</strong> ${escapeHtml(row.activity)}</p></div>`).join('')}</div></div><div class="panel"><h3>Langkah berikutnya</h3>${listHtml(analysis.next_steps)}</div></section>`;
   };
 
-  const normalizeMethod = (ai, payload) => { const names={}; Object.keys(profiles).forEach(k=>names[k]=profiles[k].name); return {...ai,primary_method_name:names[ai.primary_method]||payload.primary?.name||'',secondary_method_name:ai.secondary_method?names[ai.secondary_method]:''}; };
+  const normalizeMethod = (ai, payload) => {
+    const names={}; Object.keys(profiles).forEach(k=>names[k]=profiles[k].name);
+    return {...ai,primary_method_name:names[ai.primary_method]||payload.primary?.name||'',secondary_method_name:ai.secondary_method?names[ai.secondary_method]:''};
+  };
 
   const renderNeedAI = (analysis) => {
     const result=document.getElementById('result'); if(!result||result.dataset.aiRendered==='1') return;
@@ -65,13 +74,30 @@
     result.dataset.aiRequested='1'; addStyles();
     if(methodPage()) result.innerHTML='<section class="panel ai-loading-host"><span class="ai-badge">HASIL PEMETAAN CARA BELAJAR</span><p class="ai-loading">Sedang membaca 12 jawaban dan keterkaitannya untuk menyusun rekomendasi yang lebih personal…</p></section>';
     else { const loading=document.createElement('section'); loading.className='ai-panel'; loading.innerHTML='<span class="ai-badge">PENDALAMAN AI TUTORIN</span><p class="ai-loading">Sedang membaca keterkaitan antarjawaban, bukan hanya satu pola…</p>'; result.appendChild(loading); }
-    const payload=type==='need'?getNeedAnalysis():getMethodAnalysis(); if(!payload)return;
-    try { const ai=await runAI(type,payload); if(methodPage()) renderMethodResult(normalizeMethod(ai,payload)); else { result.querySelector('.ai-panel')?.remove(); renderNeedAI(ai); } }
-    catch(error) { console.warn('Tutorin AI analysis unavailable:',error?.message||error); if(methodPage()) result.innerHTML='<section class="ai-panel"><span class="ai-badge">HASIL ASESMEN</span><p class="ai-error">Hasil personalisasi AI belum tersedia. Silakan coba kembali beberapa saat lagi.</p></section>'; else { const loading=result.querySelector('.ai-panel'); if(loading) loading.innerHTML='<span class="ai-badge">PENDALAMAN AI TUTORIN</span><p class="ai-error">Pendalaman AI sedang tidak tersedia. Hasil asesmen utama tetap dapat digunakan.</p>'; } }
+    const payload=type==='need'?getNeedAnalysis():getMethodAnalysis();
+    if(!payload){ result.dataset.aiRequested=''; return; }
+    try {
+      const ai=await runAI(type,payload);
+      if(methodPage()) renderMethodResult(normalizeMethod(ai,payload));
+      else { result.querySelector('.ai-panel')?.remove(); renderNeedAI(ai); }
+    } catch(error) {
+      console.warn('Tutorin AI analysis unavailable:',error?.message||error);
+      const message=error?.message||'AI analysis failed';
+      const detail=message.includes('429')||message.toLowerCase().includes('quota')?'Layanan AI sedang mencapai batas penggunaan.':message.includes('503')?'Layanan AI belum terkonfigurasi di server.':message.toLowerCase().includes('timeout')?'Analisis AI membutuhkan waktu lebih lama dari batas tunggu.':'Analisis AI belum berhasil diproses.';
+      if(methodPage()) result.innerHTML=`<section class="ai-panel"><span class="ai-badge">HASIL ASESMEN</span><p class="ai-error">${detail}</p><button type="button" class="ai-retry">Coba lagi</button></section>`;
+      else { const loading=result.querySelector('.ai-panel'); if(loading) loading.innerHTML=`<span class="ai-badge">PENDALAMAN AI TUTORIN</span><p class="ai-error">${detail}</p><button type="button" class="ai-retry">Coba lagi</button>`; }
+      result.querySelector('.ai-retry')?.addEventListener('click',()=>requestForPage(true),{once:true});
+    }
   };
 
-  const observe=()=>{const result=document.getElementById('result');if(!result)return;const observer=new MutationObserver(()=>{if(!methodPage())requestForPage();});observer.observe(result,{childList:true,subtree:false,attributes:true,attributeFilter:['class']});requestForPage();};
-  window.addEventListener('tutorin:assessment-complete', () => requestForPage(true));
-  window.TutorinAssessmentAI={runAI,ENDPOINT};
+  const observe=()=>{
+    const result=document.getElementById('result'); if(!result)return;
+    const observer=new MutationObserver(()=>{ if(!methodPage()) requestForPage(); });
+    observer.observe(result,{childList:true,subtree:false,attributes:true,attributeFilter:['class']});
+    requestForPage();
+  };
+
+  window.TutorinAssessmentAI={runAI,ENDPOINT,requestForPage};
+  window.addEventListener('tutorin:assessment-complete',()=>requestForPage(true));
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
 })();
