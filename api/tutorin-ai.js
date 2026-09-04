@@ -38,6 +38,7 @@ function json(data, status = 200) {
 
 function cleanMessages(messages) {
   if (!Array.isArray(messages)) return null;
+
   const cleaned = messages
     .filter(item => item && (item.role === 'user' || item.role === 'assistant'))
     .slice(-12)
@@ -48,33 +49,50 @@ function cleanMessages(messages) {
     .filter(item => item.content);
 
   if (!cleaned.length || cleaned[cleaned.length - 1].role !== 'user') return null;
-  const serializedLength = JSON.stringify(cleaned).length;
-  if (serializedLength > 24000) return null;
+  if (JSON.stringify(cleaned).length > 24000) return null;
   return cleaned;
+}
+
+function extractOutputText(data) {
+  if (typeof data?.output_text === 'string' && data.output_text.trim()) {
+    return data.output_text.trim();
+  }
+
+  const pieces = [];
+  for (const item of Array.isArray(data?.output) ? data.output : []) {
+    for (const content of Array.isArray(item?.content) ? item.content : []) {
+      if (typeof content?.text === 'string' && content.text.trim()) {
+        pieces.push(content.text.trim());
+      }
+    }
+  }
+  return pieces.join('\n').trim();
 }
 
 async function callOpenAI(messages) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 35000);
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
   try {
-    return await fetch('https://api.openai.com/v1/responses', {
+    const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        'X-Client-Request-Id': `tutorin-ai-${crypto.randomUUID()}`
+        authorization: `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: MODEL,
         instructions: SYSTEM_PROMPT,
         input: messages.map(message => ({
           role: message.role,
-          content: message.content
+          content: [{ type: 'input_text', text: message.content }]
         })),
         max_output_tokens: 1200
       }),
       signal: controller.signal
     });
+
+    return response;
   } finally {
     clearTimeout(timeout);
   }
@@ -95,20 +113,30 @@ export default async function handler(request) {
       response = await callOpenAI(messages);
     } catch (error) {
       console.error('Tutorin AI request error:', error?.message || error);
-      return json({ error: error?.name === 'AbortError' ? 'Tutorín AI membutuhkan waktu terlalu lama. Coba lagi.' : 'Tutorín AI sedang mengalami kendala.' }, 504);
+      return json({
+        error: error?.name === 'AbortError'
+          ? 'Tutorín AI membutuhkan waktu terlalu lama. Coba lagi.'
+          : 'Tutorín AI sedang mengalami kendala koneksi.'
+      }, 504);
     }
 
     if (!response.ok) {
       const detail = await response.text();
       console.error('Tutorin AI OpenAI failure:', response.status, detail.slice(0, 1500));
+
       if (response.status === 401) return json({ error: 'Layanan AI belum terhubung dengan benar.' }, 503);
-      if (response.status === 429) return json({ error: 'Tutorín AI sedang ramai. Coba lagi sebentar.' }, 429);
+      if (response.status === 429) return json({ error: 'Tutorín AI sedang ramai atau kuota AI tercapai. Coba lagi sebentar.' }, 429);
+      if (response.status >= 500) return json({ error: 'Layanan AI sedang mengalami gangguan. Coba lagi sebentar.' }, 502);
       return json({ error: 'Tutorín AI belum bisa menjawab saat ini.' }, 502);
     }
 
     const data = await response.json();
-    const answer = String(data.output_text || '').trim();
-    if (!answer) return json({ error: 'Tutorín AI tidak mengembalikan jawaban.' }, 502);
+    const answer = extractOutputText(data);
+
+    if (!answer) {
+      console.error('Tutorin AI empty response:', JSON.stringify(data).slice(0, 3000));
+      return json({ error: 'Tutorín AI tidak mengembalikan jawaban.' }, 502);
+    }
 
     return json({ ok: true, answer, model: MODEL });
   } catch (error) {
