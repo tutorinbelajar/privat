@@ -16,6 +16,22 @@ window.startMethodAssessment=goMethod;
 window.home=()=>window.location.href='index.html';
 window.show=()=>{};
 
+// Add Tutorín AI to the existing homepage navigation without changing the site's current structure.
+(function addTutorinAiNav(){
+  const apply=()=>{
+    const nav=document.querySelector('.site-header nav');
+    if(!nav || nav.querySelector('a[href="tutorin-ai.html"]')) return;
+    const link=document.createElement('a');
+    link.href='tutorin-ai.html';
+    link.textContent='Tutorín AI';
+    const cta=nav.querySelector('.nav-cta');
+    if(cta) nav.insertBefore(link,cta);
+    else nav.appendChild(link);
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
+  else apply();
+})();
+
 // The final homepage CTA should offer one clear action: WhatsApp consultation.
 (function simplifyFinalCta(){
   const apply=()=>{
