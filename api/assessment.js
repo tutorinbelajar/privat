@@ -3,7 +3,10 @@ const MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8' }
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store'
+    }
   });
 }
 
@@ -14,9 +17,51 @@ Buat analisis yang hangat, spesifik, mudah dipahami orang tua, dan tidak terdeng
 Fokus pada: apa yang paling terlihat dari pola jawaban, kemungkinan kebutuhan belajar, apa yang sebaiknya dilakukan tutor, dan langkah praktis orang tua.
 Jika sinyal lemah atau konflik, katakan bahwa hasil adalah indikasi awal dan perlu divalidasi melalui sesi belajar nyata.
 Jangan menggunakan istilah diagnosis, gangguan, atau label psikologis.
-Kembalikan JSON valid dengan tepat field: summary, key_observations, parent_guidance, tutor_guidance, next_steps.
-summary adalah 2-4 kalimat.
-key_observations, parent_guidance, tutor_guidance, next_steps masing-masing berupa array 3-5 item.`;
+Kembalikan JSON sesuai schema yang diberikan.`;
+
+const OUTPUT_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    summary: { type: 'string' },
+    key_observations: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
+    parent_guidance: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
+    tutor_guidance: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 },
+    next_steps: { type: 'array', items: { type: 'string' }, minItems: 3, maxItems: 5 }
+  },
+  required: ['summary', 'key_observations', 'parent_guidance', 'tutor_guidance', 'next_steps']
+};
+
+async function callOpenAI(serialized) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000);
+  try {
+    return await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        instructions: SYSTEM,
+        input: `Berikut data terstruktur dari rule engine Tutorin. Gunakan hanya data ini.\n${serialized}`,
+        max_output_tokens: 900,
+        text: {
+          format: {
+            type: 'json_schema',
+            name: 'tutorin_assessment_analysis',
+            strict: true,
+            schema: OUTPUT_SCHEMA
+          }
+        }
+      }),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 export default async function handler(request) {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204 });
@@ -32,20 +77,18 @@ export default async function handler(request) {
     const serialized = JSON.stringify({ assessmentType: type, analysis: payload });
     if (serialized.length > 50000) return json({ error: 'Assessment payload too large' }, 413);
 
-    const response = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-      body: JSON.stringify({
-        model: MODEL,
-        instructions: SYSTEM,
-        input: `Berikut data terstruktur dari rule engine Tutorin. Gunakan hanya data ini.\n${serialized}`,
-        max_output_tokens: 900
-      })
-    });
+    let response;
+    try {
+      response = await callOpenAI(serialized);
+    } catch (error) {
+      const message = error?.name === 'AbortError' ? 'OpenAI request timed out' : (error?.message || 'OpenAI request failed');
+      console.error('OpenAI request error:', message);
+      return json({ error: 'AI analysis timed out' }, 504);
+    }
 
     if (!response.ok) {
       const detail = await response.text();
-      console.error('OpenAI request failed:', response.status, detail.slice(0, 500));
+      console.error('OpenAI request failed:', response.status, detail.slice(0, 1000));
       return json({ error: 'AI analysis failed' }, 502);
     }
 
@@ -54,11 +97,11 @@ export default async function handler(request) {
     if (!text) return json({ error: 'AI returned no analysis' }, 502);
 
     let result;
-    try { result = JSON.parse(text); }
-    catch {
-      const match = text.match(/\{[\s\S]*\}/);
-      if (!match) return json({ error: 'AI returned invalid analysis' }, 502);
-      result = JSON.parse(match[0]);
+    try {
+      result = JSON.parse(text);
+    } catch (error) {
+      console.error('AI JSON parse failed:', error?.message || error, text.slice(0, 1000));
+      return json({ error: 'AI returned invalid analysis' }, 502);
     }
 
     return json({
