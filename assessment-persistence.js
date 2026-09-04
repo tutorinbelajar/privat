@@ -6,7 +6,23 @@
   const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } };
   const write = (status = 'in_progress') => {
     if (!Array.isArray(a)) return;
-    try { localStorage.setItem(KEY, JSON.stringify({ answers: a, currentIndex: i, status, savedAt: Date.now() })); } catch {}
+    try {
+      const answerDetails = a.map((v, index) => ({
+        question: qs[index]?.[0] || '',
+        prompt: qs[index]?.[1] || '',
+        answer: qs[index]?.[2]?.[Number(v)] || '',
+        value: Number(v),
+        mappedProfile: qs[index]?.[3]?.[Number(v)] || null
+      }));
+      localStorage.setItem(KEY, JSON.stringify({
+        type,
+        answers: a,
+        answerDetails,
+        currentIndex: i,
+        status,
+        savedAt: Date.now()
+      }));
+    } catch {}
   };
   const restore = () => {
     const data = read();
