@@ -30,6 +30,40 @@ window.show=()=>{};
   else apply();
 })();
 
+// Add useful reference links to the homepage feature cards.
+(function addFeatureReferenceLinks(){
+  const apply=()=>{
+    const panels=[...document.querySelectorAll('.features-grid .feature-panel')];
+    if(!panels.length) return;
+
+    const tutorPanel=panels.find(panel=>panel.querySelector('h3')?.textContent.trim().toLowerCase()==='tutor dipilih untuk kebutuhan anak');
+    if(tutorPanel && !tutorPanel.querySelector('[data-feature-link="tutor-profile"]')){
+      const link=document.createElement('a');
+      link.className='arrow-link';
+      link.dataset.featureLink='tutor-profile';
+      link.href='https://docs.google.com/presentation/d/1V1NWDzgHvar4TKYSr8c1tVIL2-_Lk__1YVX3p4EgCzs/edit?usp=sharing';
+      link.target='_blank';
+      link.rel='noopener noreferrer';
+      link.textContent='Lihat profil pengajar Tutorin →';
+      tutorPanel.appendChild(link);
+    }
+
+    const progressPanel=panels.find(panel=>panel.querySelector('h3')?.textContent.trim().toLowerCase()==='orang tua tetap tahu progres');
+    if(progressPanel && !progressPanel.querySelector('[data-feature-link="learning-report"]')){
+      const link=document.createElement('a');
+      link.className='arrow-link';
+      link.dataset.featureLink='learning-report';
+      link.href='https://docs.google.com/presentation/d/1bEfFeAz_jaUy7g1zDavu5NYER0H_OgFDcTq7RfHPjNM/edit?usp=sharing';
+      link.target='_blank';
+      link.rel='noopener noreferrer';
+      link.textContent='Lihat contoh laporan belajar murid →';
+      progressPanel.appendChild(link);
+    }
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
+  else apply();
+})();
+
 // The final homepage CTA should offer one clear action: WhatsApp consultation.
 (function simplifyFinalCta(){
   const apply=()=>{
