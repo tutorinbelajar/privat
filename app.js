@@ -30,6 +30,64 @@ window.show=()=>{};
   else apply();
 })();
 
+// Mobile-friendly hamburger navigation. Desktop navigation stays unchanged.
+(function setupMobileNav(){
+  const apply=()=>{
+    const header=document.querySelector('.site-header');
+    const nav=header?.querySelector('nav');
+    const inner=header?.querySelector('.header-inner');
+    if(!header || !nav || !inner || inner.querySelector('.mobile-menu-toggle')) return;
+
+    const style=document.createElement('style');
+    style.textContent=`
+      .mobile-menu-toggle{display:none;border:1px solid var(--line);background:#fff;color:var(--ink);width:44px;height:44px;border-radius:13px;align-items:center;justify-content:center;cursor:pointer;padding:0;position:relative;z-index:61}
+      .mobile-menu-toggle span,.mobile-menu-toggle span:before,.mobile-menu-toggle span:after{display:block;width:19px;height:2px;background:currentColor;border-radius:4px;transition:transform .2s,opacity .2s}
+      .mobile-menu-toggle span:before,.mobile-menu-toggle span:after{content:'';position:absolute}
+      .mobile-menu-toggle span:before{transform:translateY(-6px)}
+      .mobile-menu-toggle span:after{transform:translateY(6px)}
+      .mobile-menu-toggle[aria-expanded="true"] span{background:transparent}
+      .mobile-menu-toggle[aria-expanded="true"] span:before{transform:rotate(45deg)}
+      .mobile-menu-toggle[aria-expanded="true"] span:after{transform:rotate(-45deg)}
+      @media(max-width:720px){
+        .header-inner{min-height:64px;position:relative}
+        .mobile-menu-toggle{display:inline-flex;flex:none}
+        .site-header nav{display:none;position:absolute;left:20px;right:20px;top:calc(100% + 8px);padding:10px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 40px rgba(0,70,42,.14);flex-direction:column;align-items:stretch;gap:3px}
+        .site-header nav.mobile-open{display:flex}
+        .site-header nav a{display:flex;align-items:center;min-height:46px;padding:10px 13px;font-size:14px;border-radius:12px}
+        .site-header nav a:hover{background:var(--soft)}
+        .site-header nav .nav-cta{justify-content:center;margin-top:4px;padding:12px 16px}
+      }
+    `;
+    document.head.appendChild(style);
+
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='mobile-menu-toggle';
+    button.setAttribute('aria-label','Buka menu navigasi');
+    button.setAttribute('aria-expanded','false');
+    button.innerHTML='<span></span>';
+    inner.appendChild(button);
+
+    const close=()=>{
+      nav.classList.remove('mobile-open');
+      button.setAttribute('aria-expanded','false');
+      button.setAttribute('aria-label','Buka menu navigasi');
+    };
+    button.addEventListener('click',()=>{
+      const open=nav.classList.toggle('mobile-open');
+      button.setAttribute('aria-expanded',String(open));
+      button.setAttribute('aria-label',open?'Tutup menu navigasi':'Buka menu navigasi');
+    });
+    nav.querySelectorAll('a').forEach(link=>link.addEventListener('click',close));
+    document.addEventListener('click',event=>{
+      if(!header.contains(event.target)) close();
+    });
+    window.addEventListener('resize',()=>{if(window.innerWidth>720) close();});
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
+  else apply();
+})();
+
 // Add useful reference links to the homepage feature cards.
 (function addFeatureReferenceLinks(){
   const apply=()=>{
