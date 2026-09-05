@@ -51,9 +51,9 @@ window.show=()=>{};
       @media(max-width:720px){
         .header-inner{min-height:64px;position:relative}
         .mobile-menu-toggle{display:inline-flex;flex:none}
-        .site-header nav{display:none;position:absolute;left:20px;right:20px;top:calc(100% + 8px);padding:10px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 40px rgba(0,70,42,.14);flex-direction:column;align-items:stretch;gap:3px}
+        .site-header nav{display:none;position:absolute;left:0;right:0;top:calc(100% + 8px);padding:10px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 40px rgba(0,70,42,.14);flex-direction:column;align-items:stretch;gap:3px;z-index:60}
         .site-header nav.mobile-open{display:flex}
-        .site-header nav a{display:flex;align-items:center;min-height:46px;padding:10px 13px;font-size:14px;border-radius:12px}
+        .site-header nav.mobile-open a,.site-header nav.mobile-open a:not(.nav-cta){display:flex !important;align-items:center;min-height:46px;padding:10px 13px;font-size:14px;border-radius:12px}
         .site-header nav a:hover{background:var(--soft)}
         .site-header nav .nav-cta{justify-content:center;margin-top:4px;padding:12px 16px}
       }
