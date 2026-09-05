@@ -16,17 +16,15 @@ window.startMethodAssessment=goMethod;
 window.home=()=>window.location.href='index.html';
 window.show=()=>{};
 
-// Add Tutorín AI to the existing homepage navigation without changing the site's current structure.
-(function addTutorinAiNav(){
+// Keep the main navigation focused: remove any legacy Tutorín AI link and rename Asesmen.
+(function cleanMainNav(){
   const apply=()=>{
-    const nav=document.querySelector('.site-header nav');
-    if(!nav || nav.querySelector('a[href="tutorin-ai.html"]')) return;
-    const link=document.createElement('a');
-    link.href='tutorin-ai.html';
-    link.textContent='Tutorín AI';
-    const cta=nav.querySelector('.nav-cta');
-    if(cta) nav.insertBefore(link,cta);
-    else nav.appendChild(link);
+    document.querySelectorAll('.site-header nav a').forEach(link=>{
+      const text=link.textContent.trim().toLowerCase();
+      const href=(link.getAttribute('href')||'').toLowerCase();
+      if(text.includes('tutorín ai') || text.includes('tutorin ai') || href.includes('tutorin-ai')) link.remove();
+      else if(text==='asesmen' || text==='asesmen belajar') link.textContent='Analisa Belajar';
+    });
   };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true});
   else apply();
